@@ -1,0 +1,15 @@
+QEMU:
+sudo apt install qemu-system-x86-hwe
+
+NASM:
+sudo apt install build-essential
+or
+sudo apt install nasm
+
+
+in your WINDOWS user folder place a file named ".wslconfig" with the following 2 lines:
+[wsl2]
+nestedVirtualization=true
+
+
+It is reccomended to add comprun to path for simplicity however it is a very unpolished script and is designed only for this environment and only to compile and run a raw disk image
