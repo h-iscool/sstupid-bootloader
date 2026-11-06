@@ -1,0 +1,47 @@
+disp_help(){
+    echo "Compile + Run Help:"
+    echo
+    echo "Command Syntax:"
+    echo "com-run.sh(or alias) <asm> <optional output file names> "
+    echo
+    echo "Run --help or -h to view this screen"
+    echo
+    echo "THIS COMMAND DOES NOT UTILIZE A LINKER BECAUSE IT IS TO COMPILE AND RUN RAW DISK IMAGES"
+    echo "assumes intel syntax, sybau and stop complaining"
+}
+
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    disp_help
+    exit 0
+fi
+
+
+compileandrun(){
+    local asm_file=$1
+    local outputfile="a.bin"
+
+    if [ -n "$2" ]; then
+        outputfile=$2
+    fi
+
+    nasm -f bin -o "$outputfile" "$asm_file"
+    qemu-system-x86_64 \
+  -enable-kvm \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -vga virtio -display gtk,gl=on \
+  -drive file="$outputfile",if=ide,format=raw \
+  -nic user
+
+}
+
+
+
+if [ -f "$1" ]; then
+    compileandrun "$1" "$2"
+
+else
+    echo "$1 is not a file"
+    exit 1
+fi
