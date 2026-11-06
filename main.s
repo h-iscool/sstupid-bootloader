@@ -1,47 +1,31 @@
-mov ah, 0x0E
+.intel_syntax noprefix
+mov sp, 0x55555500
+
+mov ah, 0xE
+movzx bl, 0x7
+
 mov al, 'H'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, 'a'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, 'i'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, ' '
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, ':'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
-mov al, 'p'
-mov bh, 0x00
-mov bl, 0x07
+mov al, 'P'
 int 0x10
-mov ah, 0x0E
-mov al, 0x0A
-mov bh, 0x00
-mov bl, 0x07
+mov al, 0x0a
 int 0x10
-mov ah, 0x0E
-mov al, 0x0D
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
+mov al, 0x0d
+
+mov ax, [ip+string]
+call write_string
 
 point:
 mov ah, 0x00
-int 0x16
+int 0x16 #get key press
 
 cmp al, 0x08
 je backspace
@@ -54,6 +38,20 @@ mov bh, 0x00
 mov bl, 0x07
 int 0x10
 jmp point
+
+write_string:
+	#ax -> pointer to null terminated string
+	mov di, ax
+	xor cx, cx
+	movzx bl, 0x7
+	.write_string_loop:
+		test [di+cx], 0x0
+		jz .write_string_skip
+		ret
+		.write_string_skip:
+		movzx al, [di+cx]
+		inc cx
+	jmp .write_string_loop
 
 backspace:
 mov ah, 0x0E
@@ -85,5 +83,8 @@ mov bl, 0x07
 int 0x10
 jmp point
 
-times 510 - ( $-$$ ) db 0
+string:
+.asciiz "Hello world"
+
+times 510 - ( $-$$ ) db 0 #pad up until the special byte
 dw 0xAA55
