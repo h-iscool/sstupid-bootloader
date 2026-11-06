@@ -1,4 +1,3 @@
-.intel_syntax noprefix
 mov sp, 0x55555500
 
 mov ah, 0xE
@@ -86,5 +85,5 @@ jmp point
 string:
 .asciiz "Hello world"
 
-times 510 - ( $-$$ ) db 0 #pad up until the special byte
+times 510 - ( $-$$ ) db 0 #pad up until the special dword
 dw 0xAA55
