@@ -1,0 +1,32 @@
+compileandrun(){
+nasm -f bin -o "stage1.bin" "main.asm"
+nasm -f elf32 -o "stage2.o" "stage2.asm"
+# cat main.bin stage2.bin > out.bin
+
+gcc -m32 -c kernel.c -o kernel.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+
+ld -m elf_i386 -T linker.ld stage2.o kernel.o -o linked.bin --oformat binary
+
+cat stage1.bin linked.bin > out.bin
+
+# 20 sectors padding:
+truncate -s 10240 out.bin
+
+
+local kvmargs=""
+if [ -w /dev/kvm ]; then
+    kvmargs="-enable-kvm -cpu host"
+else
+    kvmargs="-accel tcg,thread=multi -cpu qemu64"
+fi
+qemu-system-x86_64 \
+  $kvmargs \
+  -smp 2 \
+  -m 2G \
+  -vga virtio -display gtk \
+  -drive file="out.bin",if=ide,format=raw \
+  -nic user
+
+}
+
+compileandrun
