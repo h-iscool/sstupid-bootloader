@@ -26,6 +26,12 @@ xor di,di ;;our data ptr
 
 
 
+;;remove next line to enable console:
+jmp enter_protected_mode
+
+
+
+
 
 
 ;;basic console thing (I NEED A WAY OF INTERACTING WITH TS BEFORE I LOSE MY MIND):
