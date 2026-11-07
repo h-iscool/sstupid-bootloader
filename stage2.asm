@@ -117,11 +117,11 @@ mov di, bx ;;restore di
 
 ;; clear inline/incode/in.text/whatever "buffer"
 
-xor cx, cx ;; temp loop idx
+xor bx, bx ;; temp loop idx
 clear_buffer_loop:
-mov byte [charbuffer+cx], 0 ;;write 0 to the current byte charbuffer[index(technically offset but whatever atp)]
-inc cx
-cmp cx, 64
+mov byte [charbuffer+bx], 0 ;;write 0 to the current byte charbuffer[index(technically offset but whatever atp)]
+inc bx
+cmp bx, 64
 jl clear_buffer_loop ;; if cmp is less than 64 jump
 
 xor di, di ;;reset di (the actual pointer)
