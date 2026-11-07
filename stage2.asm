@@ -1,88 +1,24 @@
 [org 0x7e00]; start in memory according to stage 1
+[bits 16]
 
-mov ah, 0x0E
-mov al, 'S'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov al, 'T'
-int 0x10
-mov al, 'A'
-int 0x10
-mov al, 'G'
-int 0x10
-mov al, 'E'
-int 0x10
-mov al, '2'
-int 0x10
-mov al, ' '
-int 0x10
-mov al, 'Y'
-int 0x10
-mov al, 'A'
-int 0x10
-mov al, 'Y'
-int 0x10
-mov al, '!'
-int 0x10
 
-mov ah, 0x0E
-mov al, 0x0A
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x0D
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
+;;cleanup ds reg
 
-point:
-mov ah, 0x00
-int 0x16
+xor ax,ax
+mov ds,ax
 
-cmp al, 0x08
-je backspace
+xor di,di ;;our data ptr
 
-cmp al, 0x0D
-je enter
 
-mov ah, 0x0E
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-jmp point
 
-backspace:
-mov ah, 0x0E
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x20
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x08
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-jmp point
+bootloaderConsoleLoop:
 
-enter:
-mov ah, 0x0E
-mov al, 0x0A
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x0D
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-jmp point
 
+
+jmp bootloaderConsoleLoop
+
+charbuffer:
+times 64 db 0 ;; 64 bytes reserved for char buffer - only allow 63 for null term strs.
 
 ; padding for 1024 bytes (current s2 size)
 times 1024 - ( $-$$ ) db 0

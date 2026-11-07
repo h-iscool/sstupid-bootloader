@@ -1,48 +1,5 @@
 [org 0x7c00] ; the bootloader is the first 512 bytes of the drive but starts at 0x7c00 in memory for who knows why (i didnt look it up) so this just is being memory safe
-
-mov ah, 0x0E
-mov al, 'H'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 'a'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 'i'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, ' '
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, ':'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 'p'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x0A
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov ah, 0x0E
-mov al, 0x0D
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-
-
-
+[bits 16]
 
 ; LOAD STAGE 2:
 
@@ -74,35 +31,21 @@ mov al, 'E'
 mov bh, 0x00
 mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, 'R'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, 'R'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, ':'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, ' '
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
-mov ah, 0x0E
 mov al, '1'
-mov bh, 0x00
-mov bl, 0x07
 int 0x10
 hlt
 
-;;padding and stuff:
 
+
+;;padding and bootloader sig:
 
 times 510 - ( $-$$ ) db 0
 dw 0xAA55
