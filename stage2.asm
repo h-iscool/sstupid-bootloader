@@ -1,4 +1,4 @@
-[org 0x7e00]; start in memory according to stage 1
+; [org 0x7e00]; start in memory according to stage 1 REMOVED BECAUSE LINKER
 [bits 16]
 
 global stage2_start ;;export stage2_start for linker
@@ -6,13 +6,18 @@ global stage2_start ;;export stage2_start for linker
 ;; call the extern later
 ;;when using linker, remove padding
 
+extern kernel_main
+
 
 ;; https://en.wikipedia.org/wiki/BIOS_interrupt_call#Interrupt_table
 
-;;cleanup ds reg
+
+stage2_start:
+;;cleanup regs
 
 xor ax,ax
 mov ds,ax
+mov es, ax
 
 xor di,di ;;our data ptr
 
@@ -25,132 +30,183 @@ xor di,di ;;our data ptr
 
 ;;basic console thing (I NEED A WAY OF INTERACTING WITH TS BEFORE I LOSE MY MIND):
 
-mov ah, 0x0E
-mov al, '>'
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov al, ' '
-int 0x10
+mov si, command_start_string
+call print_until_null
+
 ; the fancy "> " before a command
 
 bootloaderConsoleLoop:
 
-;; get keypress https://en.wikipedia.org/wiki/INT_16H 0x00
+    ;; get keypress https://en.wikipedia.org/wiki/INT_16H 0x00
 
-mov ah, 0x0
-int 0x16
+    mov ah, 0x0
+    int 0x16
 
-;; if enter then check buffer for what command it is and do what enter does (carriage return and line feed)
-cmp al, 0x0d ; technically enter is the carriage return key ;w;
-je console_enter_pressed
+    ;; if enter then check buffer for what command it is and do what enter does (carriage return and line feed)
+    cmp al, 0x0d ; technically enter is the carriage return key ;w;
+        je console_enter_pressed
 
-;;continues if not pressed
+    ;;continues if not pressed
 
-;;backspace check
-cmp al, 0x08
-je backspace_logic
+    ;;backspace check
+    cmp al, 0x08
+        je backspace_logic
 
-;;if not bs or enter:
+    ;;if not bs or enter:
 
-cmp di, 63
-je bootloaderConsoleLoop ;; if buffer is full just ignore (63 cause null terminated)
+    cmp di, 63
+        je bootloaderConsoleLoop ;; if buffer is full just ignore (63 cause null terminated)
 
-;;continues if less than 63bytes
-mov byte [charbuffer+di], al ;; add the currently pressed key (al) to the buffer
-inc di
+    ;;continues if less than 63bytes
+    mov byte [charbuffer+di], al ;; add the currently pressed key (al) to the buffer
+    inc di
 
-;;print char
-mov ah, 0x0E
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
+    ;;print char
+    mov ah, 0x0E
+    mov bh, 0x00
+    mov bl, 0x07
+    int 0x10
 
-;;loop
+    ;;loop
 
-jmp bootloaderConsoleLoop
+    jmp bootloaderConsoleLoop
 
-;;backspace bs
-backspace_logic:
+    ;;backspace bs
+    backspace_logic:
 
-;;no underflow
-cmp di, 0x0
-je bootloaderConsoleLoop
+        ;;no underflow
+        cmp di, 0x0
+        je bootloaderConsoleLoop
 
-dec di
-mov byte [charbuffer+di], 0
-mov ah, 0x0E
-mov al, 0x08
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov al, ' '
-int 0x10
-mov al, 0x08
-int 0x10
-jmp bootloaderConsoleLoop
-
-
-;;command logic and enter stuff lol
-
-console_enter_pressed:
-
-mov bx, di ;;save di
-
-;; 32bit:
-
-mov si, charbuffer ;;string to check 1
-mov di, cmd_32bit ;;string to check 2
-mov cx, 5 ;;how many chars (realizing null term is dumb if im defining ts)
-cld ;; clear direction flags (si and di inc forward)
-repe cmpsb ; repeat while equal, compare string bytes
-je enter_protected_mode
-
-;; help/fallback:
-
-;;not writing ts rn lmao
+        dec di
+        mov byte [charbuffer+di], 0
+        mov ah, 0x0E
+        mov al, 0x08
+        mov bh, 0x00
+        mov bl, 0x07
+        int 0x10
+        mov al, ' '
+        int 0x10
+        mov al, 0x08
+        int 0x10
+        jmp bootloaderConsoleLoop
 
 
-;;reset vars
-mov di, bx ;;restore di
+    ;;command logic and enter stuff lol
+
+    console_enter_pressed:
+
+        mov bx, di ;;save di
+
+        ;; 32bit:
+
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_32bit ;;string to check 2
+        mov cx, 18 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je enter_protected_mode
 
 
-;; clear inline/incode/in.text/whatever "buffer"
-
-xor bx, bx ;; temp loop idx
-clear_buffer_loop:
-mov byte [charbuffer+bx], 0 ;;write 0 to the current byte charbuffer[index(technically offset but whatever atp)]
-inc bx
-cmp bx, 64
-jl clear_buffer_loop ;; if cmp is less than 64 jump
-
-xor di, di ;;reset di (the actual pointer)
+        ;;poweroff:
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_power_off ;;string to check 2
+        mov cx, 8 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je shutdown_command
 
 
-;; return to loop on a newline with fancy thing
+        ;; help:
 
-mov ah, 0x0E
-mov al, 0x0d
-mov bh, 0x00
-mov bl, 0x07
-int 0x10
-mov al, 0x0a
-int 0x10
-mov al, '>'
-int 0x10
-mov al, ' '
-int 0x10
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_help ;;string to check 2
+        mov cx, 4 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je help_command
+
+        ;;fallback
+
+        mov si, text_invld_err_pt_1
+        call print_until_null
+        mov si, charbuffer
+        call print_until_null
+        mov si, text_invld_err_pt_2
+        call print_until_null
+
+        ;;not writing ts rn lmao
+
+        clear_buffer:
+        ;;reset vars
+        mov di, bx ;;restore di
+
+        
+        ;; clear inline/incode/in.text/whatever "buffer"
+
+        xor bx, bx ;; temp loop idx
+        clear_buffer_loop:
+        mov byte [charbuffer+bx], 0 ;;write 0 to the current byte charbuffer[index(technically offset but whatever atp)]
+        inc bx
+        cmp bx, 64
+        jl clear_buffer_loop ;; if cmp is less than 64 jump
+
+        xor di, di ;;reset di (the actual pointer)
 
 
-jmp bootloaderConsoleLoop
+        ;; return to loop on a newline with fancy thing
+
+        mov si, command_start_string
+        call print_until_null
+
+
+        jmp bootloaderConsoleLoop
+
+
+
+
+
+;;attempted print fn rn:
+print_until_null: ;; set si to str to print with null term
+    mov ah, 0x0e
+    mov bh, 0x00
+    mov bl, 0x07
+    print_loop:
+    lodsb ;loads si into al and inc si but kinda safer (load string bytes)
+    cmp al, 0x0
+    je print_end
+    int 0x10
+    jmp print_loop
+    print_end:
+    ret
+
+
+
+
+
 
 
 ;;strings and data that i dindt put in a .data cause funny
 
+;;strs:
+
+command_start_string: db 0x0d, 0x0a, "> ",0
+
+text_entering_32bit: db 0x0d, 0x0a, "Entering 32bit mode...",0x0d, 0x0a,0
+
+text_apm_error: db 0x0d, 0x0a, "APM (advanced power management) ERROR",0x0d, 0x0a,"could not shutdown. manual shutdown at this time should not break anything",0
+
+text_help_command: db 0x0d, 0x0a, "HELP:", 0x0d, 0x0a, "to get to this page, run help",0x0d, 0x0a, "commands:",0x0d, 0x0a, "ent protected_mode",0x0d, 0x0a, "-enters 32bit protected mode and attempts to start entry into a C program",0x0d, 0x0a, "shutdown",0x0d, 0x0a, "-power off the device",0x0d, 0x0a, "help",0x0d, 0x0a, "-display this page", 0x0d, 0x0a,0
+
+text_invld_err_pt_1: db 0x0d, 0x0a, "The command",0x0d, 0x0a,0
+text_invld_err_pt_2: db 0x0d, 0x0a, "is not recognised, try help for a list of commands",0x0d, 0x0a,0
 
 ;;commands:
 
-cmd_32bit: db "32bit", 0
+cmd_32bit: db "ent protected_mode", 0
+cmd_power_off: db "shutdown", 0
+cmd_help: db "help",0
+
 
 
 
@@ -158,6 +214,69 @@ charbuffer:
 times 64 db 0 ;; 64 bytes reserved for char buffer - only allow 63 for null term strs.
 
 
+
+
+
+
+help_command:
+mov si, text_help_command
+call print_until_null
+jmp clear_buffer
+
+
+
+
+
+
+
+;;shutdown command logic: https://stackoverflow.com/questions/21463908/x86-instructions-to-power-off-computer-in-real-mode https://forum.osdev.org/viewtopic.php?t=16990 https://github.com/cirosantilli/x86-bare-metal-examples/blob/7cff2a3fc93a636f8e253892af212a30c5a58697/apm_shutdown2.S
+shutdown_command: ; https://wiki.osdev.org/APM
+    mov ah, 0x53 ;;APM command code
+    mov al, 0x00 ; install check code
+    xor bx, bx
+    int 0x15
+    jc APM_ERROR
+
+    mov ah, 0x53 ;;apm command code
+    mov al, 0x04 ; disconnect code
+    xor bx,bx
+    int 0x15
+    ; jc .disconnect_err
+    jc APM_ERROR
+
+    mov ah, 0x53 ;;apm needs to stop writing over ah ;w;
+    mov al, 0x01 ;;real mode interface
+    xor bx,bx
+    int 0x15
+    jc APM_ERROR
+
+    ;;enable pwr mngment:
+    mov ah, 0x53
+    mov al, 0x08 ; change pwr mgmt state
+    mov bx, 0x0001 ;on all devices
+    mov cx, 0x0001 ; to enabled
+    int 0x15
+    jc APM_ERROR
+
+    ;;set power state:
+    mov ah, 0x53
+    mov al, 0x07 ; set power state
+    mov bx, 0x0001 ; on all devices
+    mov cx, 0x03 ; to off
+    int 0x15
+    jc APM_ERROR
+
+    ; .disconnect_err:
+    ; jmp APM_ERROR
+    ; ; mov si, text_apm_error
+    ; ; call print_until_null
+    ; ; jmp clear_buffer
+
+
+    APM_ERROR:
+        mov si, text_apm_error
+        call print_until_null
+        jmp clear_buffer
 
 
 
@@ -175,6 +294,12 @@ times 64 db 0 ;; 64 bytes reserved for char buffer - only allow 63 for null term
 
 
 enter_protected_mode: ;; https://wiki.osdev.org/Protected_Mode#Entering_Protected_Mode
+
+mov si, text_entering_32bit
+call print_until_null
+
+
+
 cli ;; DISABLES INTERRUPTS ;w;
 lgdt [gdt_descriptor] ; loads gdt register with start of the global discriptor table
 mov eax, cr0
@@ -191,6 +316,8 @@ mov ss, ax
 mov es, ax
 
 mov esp, 0x90000
+
+call kernel_main
 
 ;;call into c file with linker (add tomorrow)
 
@@ -213,4 +340,4 @@ dd gdt_start
 
 
 ; padding for 1024 bytes (current s2 size) REMOVE WHEN USING LINKER
-times 1024 - ( $-$$ ) db 0
+; times 1024 - ( $-$$ ) db 0
