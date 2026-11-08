@@ -1,13 +1,11 @@
-#include "drivers/vga.h"
-#include "drivers/keyboard.h"
+#include "../drivers/vga.h"
+#include "../drivers/keyboard.h"
 
 static char consoleColorScheme = 0x0f;
 
-void kernel_main() {
+void vga_console() {
 
-    consoleColorScheme = vga_pack_colors(VGA_COLOR_BLACK,VGA_COLOR_LIGHT_RED);
-
-    
+    consoleColorScheme = vga_pack_colors(VGA_COLOR_BLACK,VGA_COLOR_LIGHT_RED); 
 
     vga_clearScreen(consoleColorScheme);
 

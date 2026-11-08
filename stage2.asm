@@ -1,42 +1,34 @@
-; [org 0x7e00]; start in memory according to stage 1 REMOVED BECAUSE LINKER
+;; // STAGE2 // ;;
+;;  ;;
+
 [bits 16]
 
+; [org 0x7e00]; linker manages where file starts in memory
+section .text.boot
 global stage2_start ;;export stage2_start for linker
 ;extern <linked call/jmp point>
 ;; call the extern later
 ;;when using linker, remove padding
 
-extern kernel_main
-
+extern kernel_init
 
 ;; https://en.wikipedia.org/wiki/BIOS_interrupt_call#Interrupt_table
-
 
 stage2_start:
 ;;cleanup regs
 
-xor ax,ax
+xor eax, eax
 mov ds,ax
-mov es, ax
+mov es,ax
 
-xor di,di ;;our data ptr
+xor edi,edi ;;our data ptr
 
-
-
-
-
-
-;;remove next line to enable console:
-jmp enter_protected_mode
-
-
-
-
-
+mov esi, successful_load_string
+call print_until_null
 
 ;;basic console thing (I NEED A WAY OF INTERACTING WITH TS BEFORE I LOSE MY MIND):
 
-mov si, command_start_string
+mov esi, command_start_string
 call print_until_null
 
 ; the fancy "> " before a command
@@ -69,8 +61,7 @@ bootloaderConsoleLoop:
 
     ;;print char
     mov ah, 0x0E
-    mov bh, 0x00
-    mov bl, 0x07
+    mov ebx, 0x7
     int 0x10
 
     ;;loop
@@ -87,9 +78,8 @@ bootloaderConsoleLoop:
         dec di
         mov byte [charbuffer+di], 0
         mov ah, 0x0E
-        mov al, 0x08
-        mov bh, 0x00
-        mov bl, 0x07
+	mov al, 0x08
+	mov ebx, 0x7
         int 0x10
         mov al, ' '
         int 0x10
@@ -187,23 +177,15 @@ print_until_null: ;; set si to str to print with null term
     ret
 
 
-
-
-
-
-
 ;;strings and data that i dindt put in a .data cause funny
 
 ;;strs:
 
+successful_load_string: db 0x0d, 0x0a, "Stage 2 bootloader loaded.", 0x0d, 0x0a,0
 command_start_string: db 0x0d, 0x0a, "> ",0
-
 text_entering_32bit: db 0x0d, 0x0a, "Entering 32bit mode...",0x0d, 0x0a,0
-
 text_apm_error: db 0x0d, 0x0a, "APM (advanced power management) ERROR",0x0d, 0x0a,"could not shutdown. manual shutdown at this time should not break anything",0
-
 text_help_command: db 0x0d, 0x0a, "HELP:", 0x0d, 0x0a, "to get to this page, run help",0x0d, 0x0a, "commands:",0x0d, 0x0a, "ent protected_mode",0x0d, 0x0a, "-enters 32bit protected mode and attempts to start entry into a C program",0x0d, 0x0a, "shutdown",0x0d, 0x0a, "-power off the device",0x0d, 0x0a, "help",0x0d, 0x0a, "-display this page", 0x0d, 0x0a,0
-
 text_invld_err_pt_1: db 0x0d, 0x0a, "The command",0x0d, 0x0a,0
 text_invld_err_pt_2: db 0x0d, 0x0a, "is not recognised, try help for a list of commands",0x0d, 0x0a,0
 
@@ -213,15 +195,8 @@ cmd_32bit: db "ent protected_mode", 0
 cmd_power_off: db "shutdown", 0
 cmd_help: db "help",0
 
-
-
-
 charbuffer:
 times 64 db 0 ;; 64 bytes reserved for char buffer - only allow 63 for null term strs.
-
-
-
-
 
 
 help_command:
@@ -230,15 +205,10 @@ call print_until_null
 jmp clear_buffer
 
 
-
-
-
-
-
 ;;shutdown command logic: https://stackoverflow.com/questions/21463908/x86-instructions-to-power-off-computer-in-real-mode https://forum.osdev.org/viewtopic.php?t=16990 https://github.com/cirosantilli/x86-bare-metal-examples/blob/7cff2a3fc93a636f8e253892af212a30c5a58697/apm_shutdown2.S
 shutdown_command: ; https://wiki.osdev.org/APM
     mov ah, 0x53 ;;APM command code
-    mov al, 0x00 ; install check code
+    mov al, 0x00 ;;install check code
     xor bx, bx
     int 0x15
     jc APM_ERROR
@@ -285,35 +255,14 @@ shutdown_command: ; https://wiki.osdev.org/APM
         jmp clear_buffer
 
 
-
-
-
-
-
-
-
-
-
 ;; 32bit mode:
-
-
-
-
-
-
-
-
-
-
 
 
 enter_protected_mode: ;; https://wiki.osdev.org/Protected_Mode#Entering_Protected_Mode
 
 
-
 mov si, text_entering_32bit
 call print_until_null
-
 
 
 ;;disable cursor: https://wiki.osdev.org/Text_Mode_Cursor
@@ -326,7 +275,7 @@ out dx, al
 
 
 cli ;; DISABLES INTERRUPTS ;w;
-lgdt [gdt_descriptor] ; loads gdt register with start of the global discriptor table
+lgdt [gdt_descriptor] ; loads gdt register with start of the global descriptor table
 mov eax, cr0
 or al, 1 ; turn on protection enable bit in control reg 0 (cr0)
 mov cr0, eax
@@ -342,12 +291,7 @@ mov es, ax
 
 mov esp, 0x90000
 
-call kernel_main
-
-;;call into c file with linker (add tomorrow)
-
-hlt ;;halt if ever returns
-
+jmp kernel_init
 
 gdt_start:
 dd 0x0, 0x0

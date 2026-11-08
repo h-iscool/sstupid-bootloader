@@ -7,3 +7,5 @@
 <iso646.h> - Defines alternative spellings for operator tokens (e.g., and, or).
 
 (thanks google ai for that nice list)
+
+These are functions that are defined implicitly by gcc, and thus don't need external files to be included (yes that includes stdlib).
