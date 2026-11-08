@@ -1,6 +1,10 @@
 #ifndef VGA_H
 #define VGA_H
 
+#define VGA_COLOR_BRIGHT_BIT 0x8
+#define VGA_COLOR_BLINK_BIT 0x8
+//bitwise or with a color to get corresponding light color
+
 #define VGA_COLOR_BLACK 0x0
 #define VGA_COLOR_BLUE 0x1
 #define VGA_COLOR_GREEN 0x2
@@ -9,6 +13,7 @@
 #define VGA_COLOR_MAGENTA 0x5
 #define VGA_COLOR_BROWN 0x6
 #define VGA_COLOR_LIGHT_GRAY 0x7
+
 #define VGA_COLOR_DARK_GRAY 0x8
 #define VGA_COLOR_LIGHT_BLUE 0x9
 #define VGA_COLOR_LIGHT_GREEN 0xa

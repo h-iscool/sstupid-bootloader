@@ -8,6 +8,11 @@ extern vga_console
 
 kernel_init:
 
+;load interrupt descriptor tables
+
 call vga_console
 
 hlt
+
+interrupt_descriptor_table:
+;db [malloc]

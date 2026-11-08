@@ -26,6 +26,10 @@ xor edi,edi ;;our data ptr
 mov esi, successful_load_string
 call print_until_null
 
+;;//DEBUG SKIP
+jmp enter_protected_mode
+;;//COMMENT FOR NORMAL FUNCTIONALITY
+
 ;;basic console thing (I NEED A WAY OF INTERACTING WITH TS BEFORE I LOSE MY MIND):
 
 mov esi, command_start_string
@@ -276,6 +280,7 @@ out dx, al
 
 cli ;; DISABLES INTERRUPTS ;w;
 lgdt [gdt_descriptor] ; loads gdt register with start of the global descriptor table
+
 mov eax, cr0
 or al, 1 ; turn on protection enable bit in control reg 0 (cr0)
 mov cr0, eax
@@ -288,8 +293,6 @@ mov ax, 0x10
 mov ds, ax
 mov ss, ax
 mov es, ax
-
-mov esp, 0x90000
 
 jmp kernel_init
 
