@@ -7,9 +7,17 @@ nasm -f elf32 -o "./build/stage2.o" "stage2.asm"
 # cat main.bin stage2.bin > out.bin
 
 gcc -m32 -c kernel.c -o ./build/kernel.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
-gcc -m32 -c vga_funcs.c -o ./build/vga_funcs.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+gcc -m32 -c ./drivers/vga.c -o ./build/vga.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+# gcc -m32 -c ./drivers/serialports.c -o ./build/serialports.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
 
-ld -m elf_i386 -T linker.ld ./build/stage2.o ./build/kernel.o ./build/vga_funcs.o -o ./build/linked.bin --oformat binary
+
+ld -m elf_i386 -T linker.ld \
+./build/stage2.o \
+./build/kernel.o \
+./build/vga.o \
+./build/keyboard.o \
+-o ./build/linked.bin --oformat binary
 
 cat ./build/stage1.bin ./build/linked.bin > ./build/out.bin
 

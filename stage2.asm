@@ -299,11 +299,30 @@ shutdown_command: ; https://wiki.osdev.org/APM
 
 
 
+
+
+
+
+
+
+
+
 enter_protected_mode: ;; https://wiki.osdev.org/Protected_Mode#Entering_Protected_Mode
+
+
 
 mov si, text_entering_32bit
 call print_until_null
 
+
+
+;;disable cursor: https://wiki.osdev.org/Text_Mode_Cursor
+mov dx, 0x3D4
+mov al, 0xA
+out dx, al
+inc dx
+mov al, 0x20
+out dx, al
 
 
 cli ;; DISABLES INTERRUPTS ;w;
