@@ -1,0 +1,9 @@
+<stddef.h> - Defines basic types and macros like size_t, ptrdiff_t, NULL, and offsetof.
+<stdint.h> - Defines exact-width integer types (int32_t, uint8_t, etc.).
+<stdbool.h> - Defines bool, true, and false.
+<stdarg.h> - Defines macros for handling variable-length argument lists.
+<limits.h> - Defines sizes and limits of basic integer types.
+<float.h> - Defines limits for floating-point types.
+<iso646.h> - Defines alternative spellings for operator tokens (e.g., and, or).
+
+(thanks google ai for that nice list)
