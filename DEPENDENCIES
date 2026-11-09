@@ -6,6 +6,8 @@ sudo apt install build-essential
 or
 sudo apt install nasm
 
+sudo apt update && sudo apt install gcc-multilib g++-multilib
+
 
 in your WINDOWS user folder place a file named ".wslconfig" with the following 2 lines:
 [wsl2]
