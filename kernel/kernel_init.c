@@ -13,6 +13,8 @@ void kernel_init_stage_2 (unsigned int vbe_load_success, unsigned int vbe_screen
 
         vga_console();
 
+
+
     }else if (vbe_load_success == 1)
     {
         vbe_init(vbe_screen_width, vbe_screen_height, bytes_per_scan_line, lfb_pointer);
