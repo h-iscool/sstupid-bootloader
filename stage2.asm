@@ -469,9 +469,15 @@ mov es, ax
 
 
 
+;; REMEMBER TO MOVE STACK PTR BEFORE ARGS LMAO
+mov esp, 0x90000
+
+
+
+
 ;;arguments for kernel.s to push to C fn later
 
-mov eax, [vbe_bpsl]
+movzx eax, word [vbe_bpsl] ;;movzx and define as word for non 32bit tjomgs
 push eax
 
 xor eax, eax
@@ -479,20 +485,20 @@ mov eax, [vbe_lfb_ptr]
 push eax        ; uint32_t pointer to LFB  also this is arg 4 because rev order
 
 xor eax, eax
-mov eax, [vbe_height]
+movzx eax, word [vbe_height]
 push eax
 
 xor eax, eax
-mov eax, [vbe_width]
+movzx eax, word [vbe_width]
 push eax
 
 xor eax, eax
-mov eax, [vbe_success] ;;all are uint32_t
+mov  eax,  [vbe_success] ;;all are uint32_t
 push eax
 
 
 
-mov esp, 0x90000
+
 
 ; hlt
 

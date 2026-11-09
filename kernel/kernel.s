@@ -15,7 +15,6 @@ push dword [esp+16] ; arg 3 (the height)
 push dword [esp+16] ; arg 2 (the width)
 push dword [esp+16] ; arg 1 (the success bit) (i copy pasted and was to lazy to delete "the" lol)
 
-
 call kernel_init_stage_2
 
 hlt

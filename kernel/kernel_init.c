@@ -16,6 +16,15 @@ void kernel_init_stage_2 (unsigned int vbe_load_success, unsigned int vbe_screen
     }else if (vbe_load_success == 1)
     {
         vbe_init(vbe_screen_width, vbe_screen_height, bytes_per_scan_line, lfb_pointer);
+        // vbe_draw_rect_px(0,0,500,300);
+        while (1){
+            vbe_draw_rgb_gaymer_bg_funni();
+
+            for (volatile int d = 0; d < 1000000; d++);
+            for (volatile int d = 0; d < 1000000; d++);
+            for (volatile int d = 0; d < 1000000; d++);
+            for (volatile int d = 0; d < 1000000; d++);
+        }
     }
     
 

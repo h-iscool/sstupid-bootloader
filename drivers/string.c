@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "string.h"
 
 void *memset(void * ptr, size_t val, size_t size){
     
@@ -25,8 +26,8 @@ void *memcpy(void * dest, const void * src, size_t size){
 
 void *memcpy32(void * dest, const void * src, size_t size){ // pretty much only to copy 4byte things like pixels
 
-    uint32_t * d = (uint32_t *)dest;
-    const uint32_t * s = (const uint32_t *)src;
+     unsigned int * d = ( unsigned int *)dest;
+    const  unsigned int * s = (const  unsigned int *)src;
 
     for (size_t i = 0; i<size; i++){
         d[i] = s[i];

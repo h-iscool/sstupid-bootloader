@@ -16,6 +16,7 @@ compile(){
 	gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/vbe.c -o ./build/vbe.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib

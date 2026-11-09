@@ -3,6 +3,12 @@
 
 #include <stddef.h>
 
+#include <limits.h>
+
+#if UINT_MAX != 0xFFFFFFFFU
+#error "UNSIGNED INT IS NOT 32 BITS"
+#endif
+
 void *memset(void * ptr, size_t val, size_t size);
 void *memcpy(void * dest, const void * src, size_t size);
 size_t strlen(const char * string);
