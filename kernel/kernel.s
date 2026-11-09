@@ -3,11 +3,13 @@
 
 global kernel_init
 extern kernel_init_stage_2
+extern interrupt_descriptor_table
 ;;end headers
 
 
 kernel_init:
 
+;lidt [interrupt_descriptor_table]
 
 push dword [esp+16] ; arg 4 (the lfb ptr)
 push dword [esp+16] ; arg 3 (the height)

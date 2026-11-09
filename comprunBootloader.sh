@@ -11,10 +11,13 @@ compileandrun(){
 	#elf32 allows to be linked together
 	nasm -f elf32 -o "./build/stage2.o" "stage2.asm"
 	nasm -f elf32 -o "./build/kernel.o" "./kernel/kernel.s"
-	gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
-	gcc -m32 -c ./kernel/console.c -o ./build/console.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
-	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
-	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+  gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o -ffreestanding -fno-pie -fno-pic -O2 -nostdlib
+	gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
 
 
 	ld -m elf_i386 -T linker.ld \
