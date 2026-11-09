@@ -481,6 +481,8 @@ movzx eax, word [vbe_bpsl] ;;movzx and define as word for non 32bit tjomgs
 push eax
 
 xor eax, eax
+;;arguments for kernel.s to push to C fn later
+
 mov eax, [vbe_lfb_ptr]
 push eax        ; uint32_t pointer to LFB  also this is arg 4 because rev order
 
@@ -495,7 +497,6 @@ push eax
 xor eax, eax
 mov  eax,  [vbe_success] ;;all are uint32_t
 push eax
-
 
 
 

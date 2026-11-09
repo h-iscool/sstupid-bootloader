@@ -60,15 +60,14 @@ compileandrun() {
   nasm -f elf32 -o ./build/stage2.o stage2.asm
   nasm -f elf32 -o ./build/kernel.o ./kernel/kernel.s
 
-  "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/console.c          -o ./build/console.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/kernel_init.c          -o ./build/kernel_init.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/vga.c             -o ./build/vga.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/vbe.c             -o ./build/vbe.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/keyboard.c        -o ./build/keyboard.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/crypto.c          -o ./build/crypto.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/string.c          -o ./build/string.o
-  "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o
 
+	for file in ./kernel/*.c ./drivers/*.c ./feature_testing_and_debug/*.c ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
+		if [ -f "$file" ]; then
+			name=$(basename "$file" .c) # cool linux command htat gives the name
+			"${CC[@]}" -c "$file" -o ./build/"$name".o "${CFLAGS[@]}"
+		fi
+	done
+  
   "${LD[@]}" -T linker.ld \
     ./build/*.o \
     -o ./build/linked.bin --oformat binary

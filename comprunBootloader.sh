@@ -15,6 +15,7 @@ compile(){
 	nasm -f elf32 -o "./build/kernel.o" "./kernel/kernel.s"
 	gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/screen.c -o ./build/screen.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/vbe.c -o ./build/vbe.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib

@@ -1,6 +1,6 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-void vga_console();
+void console();
 
 #endif
