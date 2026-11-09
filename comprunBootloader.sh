@@ -1,4 +1,5 @@
 nodependencies="-ffreestanding -fno-pie -fno-pic -fno-stack-protector -fno-builtin" 
+cppdependencies="$nodependencies -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics"
 
 compile(){
 
@@ -13,15 +14,28 @@ compile(){
 	#elf32 allows to be linked together
 	nasm -f elf32 -o "./build/stage2.o" "stage2.asm"
 	nasm -f elf32 -o "./build/kernel.o" "./kernel/kernel.s"
-	gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/screen.c -o ./build/screen.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/vbe.c -o ./build/vbe.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib
-	gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./drivers/vbe.c -o ./build/vbe.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib
+	# gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
+
+	for file in ./kernel/*.c ./drivers/*.c ./feature_testing_and_debug/*.c ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
+		if [ -f "$file" ]; then
+			name=$(basename "$file" .c) # cool linux command htat gives the name
+			gcc -m32 -c "$file" -o ./build/"$name".o $nodependencies -O2 -nostdlib
+		fi
+	done
+
+	for file in ./kernel/*.cpp ./drivers/*.cpp ./feature_testing_and_debug/*.cpp ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
+		if [ -f "$file" ]; then
+			name=$(basename "$file" .cpp) # cool linux command htat gives the name
+			g++ -m32 -c "$file" -o ./build/"$name".o $cppdependencies -O2 -nostdlib
+		fi
+	done
 
 
 	ld -m elf_i386 --no-pie -T linker.ld \
