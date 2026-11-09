@@ -1,3 +1,5 @@
+#include "console.h"
+
 #include "../drivers/vga.h"
 #include "../drivers/keyboard.h"
 #include "../drivers/crypto.h"
