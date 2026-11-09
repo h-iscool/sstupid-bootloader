@@ -4,10 +4,30 @@
 global kernel_init
 extern kernel_init_stage_2
 extern interrupt_descriptor_table
+extern _init_array_start
+extern _init_array_end
+
 ;;end headers
 
 
 kernel_init:
+
+
+
+;;prep for C++:
+
+mov edi, _init_array_start ;;constructor loop for making it workssssssssssss
+.cotr_loop:
+cmp edi, _init_array_end
+je .cotr_loop_end
+call [edi]
+add edi, 4
+jmp .cotr_loop
+.cotr_loop_end:
+
+
+
+;;push vars to C
 
 push dword [esp+16] ; arg 5 (bytes per scan line)
 push dword [esp+16] ; arg 4 (the lfb ptr)

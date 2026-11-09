@@ -8,6 +8,10 @@ SECTIONS
     .text : {
        KEEP(*(.text.boot))
        *(.text .text.*)
+       _init_array_start = .;
+       *(.init_array)
+       *(.ctors)
+       _init_array_end = .;
     }
 
     .data : {
