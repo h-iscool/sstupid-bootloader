@@ -9,7 +9,7 @@ extern interrupt_descriptor_table
 
 kernel_init:
 
-
+push dword [esp+16] ; arg 5 (bytes per scan line)
 push dword [esp+16] ; arg 4 (the lfb ptr)
 push dword [esp+16] ; arg 3 (the height)
 push dword [esp+16] ; arg 2 (the width)
