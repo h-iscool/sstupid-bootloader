@@ -61,7 +61,9 @@ compileandrun() {
   nasm -f elf32 -o ./build/kernel.o ./kernel/kernel.s
 
   "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/console.c          -o ./build/console.o
+  "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/kernel_init.c          -o ./build/kernel_init.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/vga.c             -o ./build/vga.o
+  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/vbe.c             -o ./build/vbe.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/keyboard.c        -o ./build/keyboard.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/crypto.c          -o ./build/crypto.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/string.c          -o ./build/string.o
