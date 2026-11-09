@@ -1,0 +1,5 @@
+-=-=-=-
+add bytes per scan line from 0x10 from vbe info block into C code
+byte per scan line is the number to multiply by instead of height in y*h+x=px to write
+then when thats mapped make vbe driver
+-=-=-=-
