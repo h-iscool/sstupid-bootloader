@@ -2,21 +2,30 @@
 #include "../drivers/keyboard.h"
 #include "../drivers/crypto.h"
 #include "../drivers/string.h"
+#include "syscall_wrappers.h"
 
 static char consoleColorScheme = 0x0f;
-char *buffer = (char *)0x999900;
 
 #define PRINT_IDT 309003164 //adler32 hash of print-idt
 #define PRINT_STACK 453837937 //adler32 hash of print-stack
 #define HASH 68485541 //adler32 hash of "hash"
 #define HELP 68878762 //adler32 hash of help
 
+#define MAX_ARGS 6
+
 void check_command(char command[]) {
 	//vga_printString("Command entered: ",consoleColorScheme);
+	size_t len = 0;
+	while (command[len] != '\0' && command[len] != ' ') {
+		len++;
+	}
+	//TODO:separate command[] into a command_array[], separated on spaces
 
-	int hash = adler32((void *)command,strlen(command));
+	int hash = adler32((void *)command,len);
 
-	//vga_printString(itoa(hash,buffer,10),consoleColorScheme); //debug hash
+	char *numberString = malloc(sizeof(char)*20);
+	vga_printString(itoa(hash,numberString,10),consoleColorScheme); //debug hash
+	free(numberString);
 
 	switch(hash) {
 		case HELP: //help
@@ -28,7 +37,12 @@ void check_command(char command[]) {
 			vga_printString("IDT Pointer is at: ",consoleColorScheme);
 			uintptr_t idt;
 			__asm__ volatile ("sidt %0" : "=m"(idt));
-			vga_printString(itoa(idt,buffer,16),consoleColorScheme);
+
+
+			char *IDTaddressString = malloc(sizeof(char)*20);
+			vga_printString(itoa(idt,IDTaddressString,16),consoleColorScheme);
+			free(IDTaddressString);
+
 			vga_printChar('\n',consoleColorScheme);
 			break;
 		case PRINT_STACK: //print-stack
@@ -36,8 +50,12 @@ void check_command(char command[]) {
 
 			uintptr_t sp;
 			__asm__ volatile ("mov %%esp, %0" : "=r"(sp));	
+			
 
-			vga_printString(itoa(sp,buffer,16),consoleColorScheme);
+			char *SPaddressString = malloc(sizeof(char)*20);
+			vga_printString(itoa(sp,SPaddressString,16),consoleColorScheme);
+			free(SPaddressString);
+
 			vga_printChar('\n',consoleColorScheme);
 			break;
 		case HASH: //hash

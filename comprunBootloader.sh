@@ -18,6 +18,7 @@ compileandrun(){
 	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
 
 
 	ld -m elf_i386 -T linker.ld \
