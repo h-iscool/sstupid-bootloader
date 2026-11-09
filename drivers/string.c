@@ -23,6 +23,18 @@ void *memcpy(void * dest, const void * src, size_t size){
     return dest;
 }
 
+void *memcpy32(void * dest, const void * src, size_t size){ // pretty much only to copy 4byte things like pixels
+
+    uint32_t * d = (uint32_t *)dest;
+    const uint32_t * s = (const uint32_t *)src;
+
+    for (size_t i = 0; i<size; i++){
+        d[i] = s[i];
+    }
+
+    return dest;
+}
+
 size_t strlen(const char * string){
 
     size_t returnval = 0;
