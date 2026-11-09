@@ -14,6 +14,7 @@ compile(){
 	nasm -f elf32 -o "./build/stage2.o" "stage2.asm"
 	nasm -f elf32 -o "./build/kernel.o" "./kernel/kernel.s"
 	gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
+	gcc -m32 -c ./drivers/screen.c -o ./build/screen.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/keyboard.c -o ./build/keyboard.o $nodependencies -O2 -nostdlib
 	gcc -m32 -c ./drivers/crypto.c -o ./build/crypto.o $nodependencies -O2 -nostdlib
@@ -21,7 +22,7 @@ compile(){
 	gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
 
 
-	ld -m elf_i386 -T linker.ld \
+	ld -m elf_i386 --no-pie -T linker.ld \
 	./build/*.o \
 	-o ./build/linked.bin --oformat binary
 

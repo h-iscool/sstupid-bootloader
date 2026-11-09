@@ -64,6 +64,7 @@ compileandrun() {
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/vga.c             -o ./build/vga.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/keyboard.c        -o ./build/keyboard.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/crypto.c          -o ./build/crypto.o
+  "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/screen.c          -o ./build/screen.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./drivers/string.c          -o ./build/string.o
   "${CC[@]}" "${CFLAGS[@]}" -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o
 
