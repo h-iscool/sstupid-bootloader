@@ -390,6 +390,8 @@ try_load_vbe:
         int 0x10
 
     .found_vbe_mode:
+        mov dx, [0x8500 + 0x10] ;; get bytes per scan line for later
+        mov [vbe_bpsl], dx
         mov dx, [0x8500 + 18] ;; reget width
         mov [vbe_width], dx ; store width to give to C kernel cause im not writing these shit graphics in asm
         mov dx, [0x8500 + 20] ;;re-get height
@@ -417,6 +419,7 @@ try_load_vbe:
 
     backup_vbe_mode: dw 0x0
     vbe_width: dw 0x0
+    vbe_bpsl: dw 0x0
     vbe_height: dw 0x0
     vbe_success: dd 0x0
     vbe_lfb_ptr: dd 0x0 ;; pointer to video mem
@@ -468,6 +471,10 @@ mov es, ax
 
 ;;arguments for kernel.s to push to C fn later
 
+mov eax, [vbe_bpsl]
+push eax
+
+xor eax, eax
 mov eax, [vbe_lfb_ptr]
 push eax        ; uint32_t pointer to LFB  also this is arg 4 because rev order
 
