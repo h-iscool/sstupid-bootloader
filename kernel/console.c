@@ -10,6 +10,7 @@ static char consoleColorScheme = 0x0f;
 #define PRINT_STACK 453837937 //adler32 hash of print-stack
 #define HASH 68485541 //adler32 hash of "hash"
 #define HELP 68878762 //adler32 hash of help
+#define EXIT 0 //adler32 hash of exit
 
 #define MAX_ARGS 6
 
@@ -30,7 +31,7 @@ void check_command(char command[]) {
 	switch(hash) {
 		case HELP: //help
 			vga_printString(
-			"Commands:\nprint-idt - print the address of the current interrupt descriptor table\nprint-stack - print the stack pointer\nhash - print hash of string/data\n"
+			"Commands:\nprint-idt - print the address of the current interrupt descriptor table\nprint-stack - print the stack pointer\nhash - print hash of string/data\nexit - exit console back into the kernel\n"
 			,consoleColorScheme);
 			break;
 		case PRINT_IDT: //print-idt
@@ -62,6 +63,8 @@ void check_command(char command[]) {
 			//TODO: ARGUMENTS
 			vga_printString("Use the debug hashing in kernel/console.c\n",consoleColorScheme);
 			break;
+		case EXIT: //exit
+			//maybe do this later?
 		default:
 			vga_printString("No such command: ",consoleColorScheme);
 			vga_printString(command,consoleColorScheme);
