@@ -26,10 +26,6 @@ xor edi,edi ;;our data ptr
 mov esi, successful_load_string
 call print_until_null
 
-;;//DEBUG SKIP
-jmp enter_protected_mode
-;;//COMMENT FOR NORMAL FUNCTIONALITY
-
 ;;basic console thing (I NEED A WAY OF INTERACTING WITH TS BEFORE I LOSE MY MIND):
 
 mov esi, command_start_string
@@ -116,6 +112,21 @@ bootloaderConsoleLoop:
         repe cmpsb ; repeat while equal, compare string bytes
         je shutdown_command
 
+        ;;vbe on:
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_vbe_on ;;string to check 2
+        mov cx, 10 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je vbe_enable_command
+
+        ;;vbe off:
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_vbe_off ;;string to check 2
+        mov cx, 11 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je vbe_disable_command
 
         ;; help:
 
@@ -189,14 +200,17 @@ successful_load_string: db 0x0d, 0x0a, "Stage 2 bootloader loaded.", 0x0d, 0x0a,
 command_start_string: db 0x0d, 0x0a, "> ",0
 text_entering_32bit: db 0x0d, 0x0a, "Entering 32bit mode...",0x0d, 0x0a,0
 text_apm_error: db 0x0d, 0x0a, "APM (advanced power management) ERROR",0x0d, 0x0a,"could not shutdown. manual shutdown at this time should not break anything",0
-text_help_command: db 0x0d, 0x0a, "HELP:", 0x0d, 0x0a, "to get to this page, run help",0x0d, 0x0a, "commands:",0x0d, 0x0a, "ent protected_mode",0x0d, 0x0a, "-enters 32bit protected mode and attempts to start entry into a C program",0x0d, 0x0a, "shutdown",0x0d, 0x0a, "-power off the device",0x0d, 0x0a, "help",0x0d, 0x0a, "-display this page", 0x0d, 0x0a,0
+text_help_command: db 0x0d, 0x0a, "HELP:", 0x0d, 0x0a, "to get to this page, run help",0x0d, 0x0a, "commands:",0x0d, 0x0a, "ent protected_mode",0x0d, 0x0a, "-enters 32bit protected mode and attempts to start entry into a C program",0x0d, 0x0a, "shutdown",0x0d, 0x0a, "-power off the device",0x0d, 0x0a, "help",0x0d, 0x0a, "-display this page", 0x0d, 0x0a, "enable vbe", 0x0d, 0x0a, "-attempts to enable VBE mode when loading protected mode", 0x0d, 0x0a, "disable vbe", 0x0d, 0x0a, "-unsets the flag set by enable vbe", 0x0d, 0x0a,0
 text_invld_err_pt_1: db 0x0d, 0x0a, "The command",0x0d, 0x0a,0
 text_invld_err_pt_2: db 0x0d, 0x0a, "is not recognised, try help for a list of commands",0x0d, 0x0a,0
+text_vbe_unsupported: db 0x0d, 0x0a, "VBE is unsupported", 0x0d, 0x0a,0
 
 ;;commands:
 
 cmd_32bit: db "ent protected_mode", 0
 cmd_power_off: db "shutdown", 0
+cmd_vbe_on: db "enable vbe", 0
+cmd_vbe_off: db "disable vbe", 0
 cmd_help: db "help",0
 
 charbuffer:
@@ -259,6 +273,156 @@ shutdown_command: ; https://wiki.osdev.org/APM
         jmp clear_buffer
 
 
+
+
+vbe_enable_command:
+    mov [try_enable_vbe_on_load], 0x1
+    jmp clear_buffer
+
+vbe_disable_command:
+    mov [try_enable_vbe_on_load], 0x0
+    jmp clear_buffer
+
+
+try_enable_vbe_on_load: dd 0x0
+
+;;VBE:
+
+try_load_vbe:
+
+    ;; get info:
+
+    mov ax, 0x0
+    mov es, ax
+    mov di, 0x8000 ; 0x8000 will be a buffer for a minute to hold the 512 byte "VBE Controller Info Block"
+
+
+    ;; idk buffer sig thing:
+    mov dword [es:di], "VBE2"
+
+    ;; get controler info:
+    mov ax, 0x4f00
+    int 0x10
+    cmp ax, 0x004f ;; is vbe even supported????
+    jne .vbe_unsupported
+
+    ;;if vbe is supported, get the video mode list pointer
+    ;; its 0x0e from start of controler Block
+
+    mov si, [0x8000 + 0x0e] ;;offset mode list
+    mov ax, [0x8000 + 0x10]
+    mov fs, ax
+
+    .vbe_mode_loop:
+        mov cx, [fs:si] ;;get vbe mode id
+        cmp cx, 0xffff
+        je .vbe_loop_done
+
+        add si, 2
+        push si ;; #SAVE SI REG
+
+
+        ;;query mode:
+        mov ax, 0x0
+        mov es, ax
+        mov di, 0x8500 ;store mode info block
+        mov ax, 0x4f01 ; grab mode info
+        int 0x10
+        pop si ; yay we got si back
+        cmp ax, 0x004f ;;check if query succeeded
+        jne .vbe_mode_loop ;; loop again if failed
+
+        ;;checks:
+
+        ;;Linear frame buffer:
+        mov al, [0x8500]
+        test al, 0x80 ; 0x80 is the lfb enabled bit so it being enabled means lfb is supported, test is lossless (al doesnt change)
+        jz .vbe_mode_loop ;; if failed check, continue looping
+
+
+        ;; is graphics mode
+        test al, 0x10
+        jz .vbe_mode_loop
+
+
+        ;;check for 32bit corlor depth
+        mov al, [0x8500 + 0x19]
+        cmp al, 32
+        jne .vbe_mode_loop
+
+        ;; get res:
+        mov dx, [0x8500 + 18] ; width
+        mov bx, [0x8500 + 20] ;height
+
+
+        ;;check res:
+
+        ;;rn check for 1920x1080 with a fallback of 1280x720. maybe later try for 2 or 4 k but rn this is good enough lol
+        cmp dx, 1920 ;;check for 1920 width
+        jne .try_720p
+        cmp bx, 1080
+        je .found_vbe_mode
+
+        .try_720p:
+            cmp dx, 1280
+            jne .vbe_mode_loop
+            cmp bx, 720
+            jne .vbe_mode_loop
+            mov [backup_vbe_mode], cx
+            jmp .vbe_mode_loop
+
+
+
+    .vbe_loop_done:
+        mov cx, [backup_vbe_mode]
+        cmp cx, 0 ;; bad if no mode
+        je .vbe_unsupported
+
+        ;;fix crash, reset es to 0
+
+        mov ax, 0x0
+        mov es, ax
+        mov di, 0x8500
+
+        ;; reget details for best mode
+        mov ax, 0x4f01
+        mov di, 0x8500
+        int 0x10
+
+    .found_vbe_mode:
+        mov dx, [0x8500 + 18] ;; reget width
+        mov [vbe_width], dx ; store width to give to C kernel cause im not writing these shit graphics in asm
+        mov dx, [0x8500 + 20] ;;re-get height
+        mov [vbe_height], dx ;store height
+
+        mov eax, [0x8500+0x28]
+        mov [vbe_lfb_ptr],eax ;;save lfb ptr
+
+        ;;set vid mode, 0x4000 enables lfb access
+        or cx, 0x4000
+        mov bx, cx
+        mov ax, 0x4f02 ;set vbe mode
+        int 0x10
+
+        mov dword [vbe_success], 1
+        ret
+       
+
+    .vbe_unsupported:
+        mov dword [vbe_success], 0
+        mov si, text_vbe_unsupported
+        call print_until_null
+        ret
+
+
+    backup_vbe_mode: dw 0x0
+    vbe_width: dw 0x0
+    vbe_height: dw 0x0
+    vbe_success: dd 0x0
+    vbe_lfb_ptr: dd 0x0 ;; pointer to video mem
+
+
+
 ;; 32bit mode:
 
 
@@ -268,6 +432,13 @@ enter_protected_mode: ;; https://wiki.osdev.org/Protected_Mode#Entering_Protecte
 mov si, text_entering_32bit
 call print_until_null
 
+
+cmp [try_enable_vbe_on_load], 0x1
+jne skip_vbe
+
+call try_load_vbe
+
+skip_vbe:
 
 ;;disable cursor: https://wiki.osdev.org/Text_Mode_Cursor
 mov dx, 0x3D4
@@ -280,7 +451,6 @@ out dx, al
 
 cli ;; DISABLES INTERRUPTS ;w;
 lgdt [gdt_descriptor] ; loads gdt register with start of the global descriptor table
-
 mov eax, cr0
 or al, 1 ; turn on protection enable bit in control reg 0 (cr0)
 mov cr0, eax
@@ -293,6 +463,31 @@ mov ax, 0x10
 mov ds, ax
 mov ss, ax
 mov es, ax
+
+
+
+;;arguments for kernel.s to push to C fn later
+
+mov eax, [vbe_lfb_ptr]
+push eax        ; uint32_t pointer to LFB  also this is arg 4 because rev order
+
+xor eax, eax
+mov eax, [vbe_height]
+push eax
+
+xor eax, eax
+mov eax, [vbe_width]
+push eax
+
+xor eax, eax
+mov eax, [vbe_success] ;;all are uint32_t
+push eax
+
+
+
+mov esp, 0x90000
+
+; hlt
 
 jmp kernel_init
 

@@ -2,17 +2,19 @@
 [bits 32]
 
 global kernel_init
-extern vga_console
+extern kernel_init_stage_2
 ;;end headers
 
 
 kernel_init:
 
-;load interrupt descriptor tables
 
-call vga_console
+push dword [esp+16] ; arg 4 (the lfb ptr)
+push dword [esp+16] ; arg 3 (the height)
+push dword [esp+16] ; arg 2 (the width)
+push dword [esp+16] ; arg 1 (the success bit) (i copy pasted and was to lazy to delete "the" lol)
+
+
+call kernel_init_stage_2
 
 hlt
-
-interrupt_descriptor_table:
-;db [malloc]

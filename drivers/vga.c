@@ -26,16 +26,6 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
         vga_cursor_x = 0;
         vga_cursor_y++;
     }
-
-    else if (toPrint == '\b'){
-	vga_cursor_x--;
-	volatile char * screen = (volatile char*)0xb8000;
-	int offset = (vga_cursor_y*80+vga_cursor_x)*2;
-
-	screen[offset] = 0x0;
-	screen[offset+1] = color; // no color rn
-    }
-
     else{
         volatile char * screen = (volatile char*)0xb8000;
         int offset = (vga_cursor_y*80+vga_cursor_x)*2;
