@@ -1,6 +1,6 @@
 nodependencies="-ffreestanding -fno-pie -fno-pic -fno-stack-protector -fno-builtin" 
 
-compileandrun(){
+compile(){
 
 	rm -rf ./build/
 	mkdir -p ./build
@@ -40,6 +40,9 @@ compileandrun(){
 	# 20 sectors padding:
 	truncate -s 10240 ./build/image.bin
 
+}
+
+run() {
 	local kvmargs=""
 	if [ -w /dev/kvm ]; then
 		kvmargs="-enable-kvm -cpu host"
@@ -56,4 +59,10 @@ compileandrun(){
 
 }
 
-compileandrun
+
+if [[ $0 != "*-s*" ]]; then
+	compile
+fi
+
+
+run $0
