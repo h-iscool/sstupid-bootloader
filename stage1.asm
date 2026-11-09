@@ -5,48 +5,9 @@
 
 ; LOAD STAGE 2:
 
-mov bx, 0x7 
-mov ah, 0xE
-mov al, 'L'
-int 0x10
-mov al, 'o'
-int 0x10
-mov al, 'a'
-int 0x10
-mov al, 'd'
-int 0x10
-mov al, 'i'
-int 0x10
-mov al, 'n'
-int 0x10
-mov al, 'g'
-int 0x10
-mov al, ' '
-int 0x10
-mov al, 's'
-int 0x10
-mov al, 'e'
-int 0x10
-mov al, 'c'
-int 0x10
-mov al, 't'
-int 0x10
-mov al, 'o'
-int 0x10
-mov al, 'r'
-int 0x10
-mov al, 's'
-int 0x10
-mov al, '.'
-int 0x10
-mov al, '.'
-int 0x10
-mov al, '.'
-int 0x10
-mov al, 0xa
-int 0x10
-mov al, 0xd
-int 0x10
+
+mov si, text_loading
+call print_until_null
 
 ; https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive
 
@@ -72,22 +33,29 @@ jc driveloader
 
 jmp 0x0000:0x7e00 ; resets the codeseg inc to 0 and jmps instruction pntr
 
+
+print_until_null: ;; set si to str to print with null term
+    mov ah, 0x0e
+    mov bx, 0x7 
+    print_loop:
+    lodsb ;loads si into al and inc si but kinda safer (load string bytes)
+    cmp al, 0x0
+    je print_end
+    int 0x10
+    jmp print_loop
+    print_end:
+    ret
+
+;;strs:
+text_err1: db "ERR: 1", 0
+text_loading: db "Loading sectors...", 0xa, 0xd, 0
+
+
 driveloader: ;; ERR: 1
-mov ah, 0x0E
-mov al, 'E'
-mov bx, 0x7
-int 0x10
-mov al, 'R'
-int 0x10
-mov al, 'R'
-int 0x10
-mov al, ':'
-int 0x10
-mov al, ' '
-int 0x10
-mov al, '1'
-int 0x10
+mov si, text_err1
+call print_until_null
 hlt
+
 
 
 
