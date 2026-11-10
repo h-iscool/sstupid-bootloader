@@ -18,6 +18,8 @@ unsigned int blended_color = ((fg_color * alpha) + (bg_color * (255 - alpha))) >
 use virtual to physical scaling to scale without streatching on any asp rto
 virtual_to_physical_scale = (float)height / 1000.0f;
 note: right edge will keep changing so be dynamic about boarders
+note: does NOT keep aspect ratio. to deal with aspect ratio utilize calculable offsets (ex screen center or 1/4 from right 1/2 from top) for static objects and for dynamic objects, utilize a static offset as a starting point then store dynamic variables such as the abstracted x and y values
+omg this HURTS idk how people do graphics design for a living ;w;
 
 use painters algerithm to have only 1 buffer
 
