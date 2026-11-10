@@ -59,6 +59,7 @@ compileandrun() {
   nasm -f bin   -o ./build/stage1.bin stage1.asm
   nasm -f elf32 -o ./build/stage2.o stage2.asm
   nasm -f elf32 -o ./build/kernel.o ./kernel/kernel.s
+  nasm -f elf32 -o ./build/syscalls.o ./kernel/syscalls.s
 
 
 	for file in ./kernel/*.c ./drivers/*.c ./feature_testing_and_debug/*.c ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE

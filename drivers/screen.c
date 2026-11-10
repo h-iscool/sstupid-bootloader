@@ -45,7 +45,7 @@ void initScreen(int screen){
 			vga_clearScreen(vga_colorScheme);
 			break;
 		case DRIVER_VBE:
-			vbe_debug();
+			//vbe_debug();
 			break;
 	}
 

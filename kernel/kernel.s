@@ -47,4 +47,5 @@ vga_skip:
 call initScreen
 call console
 
+cli ;disable interrupts so we cant recover
 hlt
