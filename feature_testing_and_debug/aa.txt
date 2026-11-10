@@ -1,0 +1,6 @@
+um putted this code:
+int atexit(void (*func)(void)){ // idgaf about memory cleanup rn cauwse we r shutting down the computr
+        return 0;
+}
+
+in the place that runs cpp code because it wants to do something and this fixes it and im to tired to do muc hresearch into it rn
