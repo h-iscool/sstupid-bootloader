@@ -6,6 +6,9 @@ extern console
 extern vbe_init
 extern initScreen
 
+extern LOAD_TESTING ;; just... yeah | There is a enable_testing flag in stage2.asm , its useful for testing stuff in C, CPP or asm
+extern call_load_testing
+
 extern interrupt_descriptor_table
 extern _init_array_start
 extern _init_array_end
@@ -43,6 +46,14 @@ jmp vga_skip
 vga:
 push 0x1
 vga_skip:
+
+
+;;testing call if enabled:
+cmp byte [call_load_testing], 0x0
+je .skip_testing_call
+call LOAD_TESTING
+.skip_testing_call:
+
 
 call initScreen
 call console
