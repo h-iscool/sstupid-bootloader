@@ -24,12 +24,24 @@ void *memcpy(void * dest, const void * src, size_t size){
     return dest;
 }
 
-void *memcpy32(void * dest, const void * src, size_t size){ // pretty much only to copy 4byte things like pixels
+void *memcpy32_fast(void *dest, const void *src, size_t count) { //asm go fast for px
+    asm volatile (
+        "cld\n\t"
+        "rep movsd"
+        : "+D"(dest), "+S"(src), "+c"(count)
+        :
+        : "memory"
+    );
+    return dest;
+}
+
+
+void *memcpy32(void * dest, const void * src, size_t count){ // pretty much only to copy 4byte things like ints
 
      unsigned int * d = ( unsigned int *)dest;
     const  unsigned int * s = (const  unsigned int *)src;
 
-    for (size_t i = 0; i<size; i++){
+    for (size_t i = 0; i<count; i++){
         d[i] = s[i];
     }
 
