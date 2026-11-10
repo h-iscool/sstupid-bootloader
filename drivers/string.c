@@ -27,7 +27,7 @@ void *memcpy(void * dest, const void * src, size_t size){
 void *memcpy32_fast(void *dest, const void *src, size_t count) { //asm go fast for px
     asm volatile (
         "cld\n\t"
-        "rep movsd"
+        "rep movsl"
         : "+D"(dest), "+S"(src), "+c"(count)
         :
         : "memory"
