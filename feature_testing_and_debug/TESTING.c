@@ -5,8 +5,8 @@ void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also w
 
     load_cpp_test();
 
-    while (1){
-        __asm__ ("hlt");
-    }
+    // while (1){
+    //     __asm__ ("hlt");
+    // }
 
 }

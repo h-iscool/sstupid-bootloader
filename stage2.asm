@@ -34,6 +34,14 @@ call print_until_null
 
 ; the fancy "> " before a command
 
+
+
+
+;; uncomment next 2 lines to auto run enable testing and ent protected_mode
+; or [call_load_testing], 0x1
+; jmp enter_protected_mode
+
+
 bootloaderConsoleLoop:
 
     ;; get keypress https://en.wikipedia.org/wiki/INT_16H 0x00
@@ -135,7 +143,7 @@ bootloaderConsoleLoop:
         mov cx, 14 ;;how many chars (realizing null term is dumb if im defining ts)
         cld ;; clear direction flags (si and di inc forward)
         repe cmpsb ; repeat while equal, compare string bytes
-        je debug_enable_command
+        je testing_enable_command
 
         ;;disable testing call:
         mov si, charbuffer ;;string to check 1
@@ -143,7 +151,7 @@ bootloaderConsoleLoop:
         mov cx, 15 ;;how many chars (realizing null term is dumb if im defining ts)
         cld ;; clear direction flags (si and di inc forward)
         repe cmpsb ; repeat while equal, compare string bytes
-        je debug_disable_command
+        je testing_disable_command
 
         ;; help:
 
@@ -256,11 +264,11 @@ vbe_disable_command:
     mov [try_enable_vbe_on_load], 0x0
     jmp clear_buffer
 
-debug_enable_command:
+testing_enable_command:
     mov [call_load_testing], 0x1
     jmp clear_buffer
 
-debug_disable_command:
+testing_disable_command:
     mov [call_load_testing], 0x0
     jmp clear_buffer
 
@@ -320,7 +328,7 @@ shutdown_command: ; https://wiki.osdev.org/APM
 
 
 
-;;VBE:
+;;VBE (MIGHT BE MOVED INTO C):
 
 try_load_vbe:
 
