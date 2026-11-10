@@ -1,5 +1,25 @@
 -=-=-=-
-add bytes per scan line from 0x10 from vbe info block into C code
-byte per scan line is the number to multiply by instead of height in y*h+x=px to write
-then when thats mapped make vbe driver
+RENDERING TIPS TO ADD:
+dirty rectangles
+only loop through the area that needs to be changed lol
+the CPU cycles for computing that area are WAY less then those used looping the whole screen
+only update that element if it needs to be changed
+have a LIST of rects that gets cleared every frame and gets added to only by elements that could change that area.
+
+Multi-level font atlas:
+have multiple font sheets and change depending on resolution ( might add later b/c don't wanna deal with a million font sizes rn)
+
+Double buffering:
+allocate a 2nd area of memory in ram the same size as the screen, once that frame is drawn, copy it to lfb_ptr
+
+bit-shift alpha blending:
+unsigned int blended_color = ((fg_color * alpha) + (bg_color * (255 - alpha))) >> 8; (do 3x for the 3colors)
+
+use virtual to physical scaling to scale without streatching on any asp rto
+virtual_to_physical_scale = (float)height / 1000.0f;
+note: right edge will keep changing so be dynamic about boarders
+
+use painters algerithm to have only 1 buffer
+
+
 -=-=-=-
