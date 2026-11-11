@@ -14,6 +14,7 @@ compile(){
 	#elf32 allows to be linked together
 	nasm -f elf32 -o "./build/stage2.o" "stage2.asm"
 	nasm -f elf32 -o "./build/kernel.o" "./kernel/kernel.s"
+	nasm -f elf32 -o "./build/syscalls.o" "./kernel/syscalls.s"
 	# gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
 	# gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
 	# gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib

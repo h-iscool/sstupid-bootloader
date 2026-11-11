@@ -6,6 +6,7 @@
 ; [org 0x7e00]; linker manages where file starts in memory
 section .text.boot
 global stage2_start ;;export stage2_start for linker
+global call_load_testing ;; export for kernel.s to call if true (0x1)
 ;extern <linked call/jmp point>
 ;; call the extern later
 ;;when using linker, remove padding
@@ -32,6 +33,14 @@ mov esi, command_start_string
 call print_until_null
 
 ; the fancy "> " before a command
+
+
+
+
+;; uncomment next 2 lines to auto run enable testing and ent protected_mode
+; or [call_load_testing], 0x1
+; jmp enter_protected_mode
+
 
 bootloaderConsoleLoop:
 
@@ -128,6 +137,22 @@ bootloaderConsoleLoop:
         repe cmpsb ; repeat while equal, compare string bytes
         je vbe_disable_command
 
+        ;;enable testing call:
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_testing_call_on ;;string to check 2
+        mov cx, 14 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je testing_enable_command
+
+        ;;disable testing call:
+        mov si, charbuffer ;;string to check 1
+        mov di, cmd_testing_call_off ;;string to check 2
+        mov cx, 15 ;;how many chars (realizing null term is dumb if im defining ts)
+        cld ;; clear direction flags (si and di inc forward)
+        repe cmpsb ; repeat while equal, compare string bytes
+        je testing_disable_command
+
         ;; help:
 
         mov si, charbuffer ;;string to check 1
@@ -205,12 +230,20 @@ text_invld_err_pt_1: db 0x0d, 0x0a, "The command",0x0d, 0x0a,0
 text_invld_err_pt_2: db 0x0d, 0x0a, "is not recognised, try help for a list of commands",0x0d, 0x0a,0
 text_vbe_unsupported: db 0x0d, 0x0a, "VBE is unsupported", 0x0d, 0x0a,0
 
+;;vars ish:
+try_enable_vbe_on_load: dd 0x0
+
+
+call_load_testing: dd 0x0
+
 ;;commands:
 
 cmd_32bit: db "ent protected_mode", 0
 cmd_power_off: db "shutdown", 0
 cmd_vbe_on: db "enable vbe", 0
 cmd_vbe_off: db "disable vbe", 0
+cmd_testing_call_on: db "enable testing", 0
+cmd_testing_call_off: db "disable testing", 0
 cmd_help: db "help",0
 
 charbuffer:
@@ -221,6 +254,23 @@ help_command:
 mov si, text_help_command
 call print_until_null
 jmp clear_buffer
+
+
+vbe_enable_command:
+    mov [try_enable_vbe_on_load], 0x1
+    jmp clear_buffer
+
+vbe_disable_command:
+    mov [try_enable_vbe_on_load], 0x0
+    jmp clear_buffer
+
+testing_enable_command:
+    mov [call_load_testing], 0x1
+    jmp clear_buffer
+
+testing_disable_command:
+    mov [call_load_testing], 0x0
+    jmp clear_buffer
 
 
 ;;shutdown command logic: https://stackoverflow.com/questions/21463908/x86-instructions-to-power-off-computer-in-real-mode https://forum.osdev.org/viewtopic.php?t=16990 https://github.com/cirosantilli/x86-bare-metal-examples/blob/7cff2a3fc93a636f8e253892af212a30c5a58697/apm_shutdown2.S
@@ -275,18 +325,10 @@ shutdown_command: ; https://wiki.osdev.org/APM
 
 
 
-vbe_enable_command:
-    mov [try_enable_vbe_on_load], 0x1
-    jmp clear_buffer
-
-vbe_disable_command:
-    mov [try_enable_vbe_on_load], 0x0
-    jmp clear_buffer
 
 
-try_enable_vbe_on_load: dd 0x0
 
-;;VBE:
+;;VBE (MIGHT BE MOVED INTO C):
 
 try_load_vbe:
 
