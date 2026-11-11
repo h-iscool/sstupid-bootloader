@@ -24,6 +24,13 @@ compile(){
 	# gcc -m32 -c ./drivers/string.c -o ./build/string.o $nodependencies -O2 -nostdlib
 	# gcc -m32 -c ./kernel/syscall_wrappers.c -o ./build/syscall_wrappers.o $nodependencies -O2 -nostdlib
 
+	for file in ./feature_testing_and_debug/*.asm; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
+		if [ -f "$file" ]; then
+			name=$(basename "$file" .asm) # cool linux command htat gives the name
+			nasm -f elf32 -o "./build/$name.o" $file
+		fi
+	done
+
 	for file in ./kernel/*.c ./drivers/*.c ./feature_testing_and_debug/*.c ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
 		if [ -f "$file" ]; then
 			name=$(basename "$file" .c) # cool linux command htat gives the name
@@ -55,8 +62,8 @@ compile(){
 
 	cat ./build/stage1.bin ./build/linked.bin > ./build/image.bin
 
-	# 20 sectors padding:
-	truncate -s 10240 ./build/image.bin
+	# 64 sectors padding:
+	truncate -s 32768 ./build/image.bin
 
 }
 

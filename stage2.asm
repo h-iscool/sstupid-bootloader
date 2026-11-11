@@ -42,6 +42,9 @@ call print_until_null
 ; jmp enter_protected_mode
 
 
+
+
+
 bootloaderConsoleLoop:
 
     ;; get keypress https://en.wikipedia.org/wiki/INT_16H 0x00
@@ -548,11 +551,15 @@ push eax
 jmp kernel_init
 
 gdt_start:
-dd 0x0, 0x0
+dd 0x0, 0x0                        ;; offset: 0x00
 gdt_code:
-dw 0xffff, 0x0000, 0x9a00, 0x00cf ;; 0xffff + f in 0x00cf = 0xfffff = 4gb max mem (max for 32bit) 0x0000 + 0x00 from 0x9a00 = start at 0x0 in ram
+dw 0xffff, 0x0000, 0x9a00, 0x00cf ;;  offset: 0x08                                ;; 0xffff + f in 0x00cf = 0xfffff = 4gb max mem (max for 32bit) 0x0000 + 0x00 from 0x9a00 = start at 0x0 in ram
 gdt_data:
-dw 0xffff, 0x0000, 0x9200, 0x00cf ;; yk just look it up: https://wiki.osdev.org/GDT_Tutorial https://wiki.osdev.org/Global_Descriptor_Table#Segment_Descriptor and some googling cause idk why some of this works tbh cause it seems like intel just smashed random flags together but whatever
+dw 0xffff, 0x0000, 0x9200, 0x00cf ;;  offset: 0x10            ;; yk just look it up: https://wiki.osdev.org/GDT_Tutorial https://wiki.osdev.org/Global_Descriptor_Table#Segment_Descriptor and some googling cause idk why some of this works tbh cause it seems like intel just smashed random flags together but whatever
+gdt_code16:
+dw 0xffff, 0x0000, 0x9a00, 0x0000 ;;  offset: 0x18 
+gdt_data16:
+dw 0xffff, 0x0000, 0x9200, 0x0000 ;;  offset 0x20   
 gdt_end:
 
 gdt_descriptor:

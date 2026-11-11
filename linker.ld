@@ -7,6 +7,7 @@ SECTIONS
 
     .text : {
        KEEP(*(.text.boot))
+       KEEP(*(.text.asmtoc)) /* this makes that stupid c to 16bit asm call fn work */
        *(.text .text.*)
        _init_array_start = .;
        *(.init_array)

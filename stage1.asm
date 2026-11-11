@@ -21,7 +21,7 @@ mov es, ax
 mov bx, 0x7e00
 
 mov ah, 0x02 ; read from drive
-mov al, 16 ; load 2 sectors (1024 bytes)
+mov al, 63 ; load 63 sectors (32256 bytes)
 mov ch, 0x0 ; cyl 0
 mov cl, 2 ; start to read from sector 2 (INDEX STARTS AT 1 AND INCR. IN 512 SO SEC2 is RIGHT after 0xAA55)
 mov dh, 0x0 ; head 0
