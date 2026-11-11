@@ -15,6 +15,14 @@ CFLAGS=(
   -nostdlib
 )
 
+CPPFLAGS=(
+  ${CFLAGS[@]}
+  -fno-exceptions
+  -fno-rtti
+  -fno-use-cxa-atexit
+  -fno-threadsafe-statics
+)
+
 case "$OS" in
   Linux)
     CC=(gcc -m32)
@@ -66,6 +74,13 @@ compileandrun() {
 		if [ -f "$file" ]; then
 			name=$(basename "$file" .c) # cool linux command htat gives the name
 			"${CC[@]}" -c "$file" -o ./build/"$name".o "${CFLAGS[@]}"
+		fi
+	done
+
+  for file in ./kernel/*.cpp ./drivers/*.cpp ./feature_testing_and_debug/*.cpp ; do #TO ADD A DIR TO COMPULOE STUFF, ADD HERE AND IN THE CPP ONE
+		if [ -f "$file" ]; then
+			name=$(basename "$file" .c) # cool linux command htat gives the name
+			"${CC[@]}" -c "$file" -o ./build/"$name".o "${CPPFLAGS[@]}"
 		fi
 	done
   
