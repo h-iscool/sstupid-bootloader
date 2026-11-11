@@ -10,30 +10,41 @@
 #define PRINT_STACK 453837937 //adler32 hash of print-stack
 #define HASH 68485541 //adler32 hash of "hash"
 #define HELP 68878762 //adler32 hash of help
-#define EXIT 0 //adler32 hash of exit
+#define EXIT 71696827 //adler32 hash of exit
+#define EXAMINE 196018920 //adler32 hash of examine
 
 #define MAX_ARGS 6
 
-extern char vga_colorScheme;
-
 void check_command(char command[]) {
-	//printString("Command entered: ");
-	size_t len = 0;
-	while (command[len] != '\0' && command[len] != ' ') {
-		len++;
+	char *command_array[MAX_ARGS] = {0};
+	size_t arguments = 0;
+
+	size_t i = 0;
+	while (command[i] != '\0') {
+		while (command[i] == ' ') {
+			command[i++] = '\0';
+		}
+
+		if (command[i] == '\0') {
+			break;
+		}
+
+		if (arguments>=MAX_ARGS) break;
+		command_array[arguments++] = &command[i];
+
+		while (command[i] != '\0' && command[i] != ' ') {
+			i++;
+		}
 	}
-	//TODO:separate command[] into a command_array[], separated on spaces
 
-	int hash = adler32((void *)command,len);
+	if (arguments == 0) return;
 
-	char *numberString = malloc(sizeof(char)*20);
-	printString(itoa(hash,numberString,10)); //debug hash
-	free(numberString);
+	unsigned int hash = adler32((void *)command_array[0],strlen((char *)command_array[0]));
 
 	switch(hash) {
 		case HELP: //help
 			printString(
-			"Commands:\nprint-idt - print the address of the current interrupt descriptor table\nprint-stack - print the stack pointer\nhash - print hash of string/data\nexit - exit console back into the kernel\n"
+			"Commands:\nprint-idt - print the address of the current interrupt descriptor table\nprint-stack - print the stack pointer\nhash - print hash of string/data\nexit - exit console back into the kernel\nexamine - read n bytes (base 10) from memory address (base 16). eg. examine ffff 80\n"
 			);
 			break;
 		case PRINT_IDT: //print-idt
@@ -62,11 +73,31 @@ void check_command(char command[]) {
 			printChar('\n');
 			break;
 		case HASH: //hash
-			//TODO: ARGUMENTS
-			printString("Use the debug hashing in kernel/console.c\n");
+			//printString("Use the debug hashing in kernel/console.c\n");
+			int hash = adler32((void *)command_array[1],strlen((char *)command_array[1]));
+			char *hashString = malloc(sizeof(char)*20);
+			printString(itoa(hash,hashString,10)); //debug hash
+			free(hashString);
+			printChar('\n');
+
 			break;
+		case EXAMINE: {
+			void * address = (void *)atoi(command_array[1],strlen(command_array[1]),16);
+			size_t size = (size_t)atoi(command_array[1],strlen(command_array[1]),10);
+
+			char buffer[size+1];
+			buffer[size] = (char)0x0; //last byte is length of buffer - 1
+
+			memcpy((void *)buffer,(void *)address,size);
+			
+			printString(buffer);
+			printChar('\n');
+			//read hex data from an address
+			break;
+		}
 		case EXIT: //exit
 			//maybe do this later?
+			break;
 		default:
 			printString("No such command: ");
 			printString(command);
@@ -79,10 +110,17 @@ void check_command(char command[]) {
 void console() {
 	clearScreen();
 
-	int command_len = 0;
-	char command[64];
+	unsigned int command_len = 0;
+	char command[64] = { 0 };
 
 	while (true){	//TODO:CHANGE TO INTERUPT CALLS
+		if (command_len>=64) {
+			printChar('\n');
+			command[63] = 0x0;
+			command_len = 0; //reset the string
+			check_command(command);
+			continue;
+		}
 
 		char pressed = getPressedASCII();
 
@@ -97,10 +135,11 @@ void console() {
 			check_command(command);
 			break;
 		case KEY_DELETE:
-			command_len--;
+			if (command_len > 0){
+				command[--command_len] = '\0';
+			}
 			break;
 		default:
-
 			printChar(pressed);
 			command[command_len] = pressed;
 			command_len++;

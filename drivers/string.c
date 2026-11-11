@@ -77,7 +77,29 @@ int strcmp (const char * string_A, const char * string_B){
 
 }
 
-char * itoa (int value, char * strbuff, int base){
+int atoi (char *string, size_t len,size_t base) {
+    const char characters[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    if (base>=36 || base<= 0) return 0;
+    if(len<=0) return 0;
+
+    int neg = (string[0]=='-');
+    int total = 0;
+
+    for(int i=neg;i<len;i++) {
+        total*=10;
+        int j;
+        for (j = 0; j<=36; j++){
+            if (string[i] == characters[j]) break;
+        }
+        total+=j;
+    }
+
+    if(neg) total*=-1;
+
+    return total;
+}
+
+char * itoa (int value, char * strbuff, size_t base) {
 
     if (base < 2 || base > 36){ //no crazy high bases or under b2
         strbuff[0] = '\0';
