@@ -38,8 +38,8 @@ call print_until_null
 
 
 ;; uncomment next 2 lines to auto run enable testing and ent protected_mode
-; or [call_load_testing], 0x1
-; jmp enter_protected_mode
+or [call_load_testing], 0x1
+jmp enter_protected_mode
 
 
 

@@ -6,6 +6,8 @@
 #include "../drivers/string.h"
 #include "syscall_wrappers.h"
 
+#include <stdbool.h>
+
 #define PRINT_IDT 309003164 //adler32 hash of print-idt
 #define PRINT_STACK 453837937 //adler32 hash of print-stack
 #define HASH 68485541 //adler32 hash of "hash"

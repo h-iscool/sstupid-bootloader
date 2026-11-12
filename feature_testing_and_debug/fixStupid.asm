@@ -4,6 +4,12 @@ section .text.asmtoc ;; need to have this low in memory otherwise errors
 [bits 32] ;; comp be happy
 
 global real_mode_interrupt
+global vbe_512_buffer
+
+align 16
+vbe_512_buffer:
+times 512 db 0x0 ;;reserve 512 bytes (yes ik this is in the text area but this text area is right after stage 1 and stage 2 and there needs to be a 0% chance that this buffer is loaded over 1mb in ram (yes ikik the iso is too small for that to be possible but this is good futureproofing imo))
+
 real_mode_interrupt:
 
 push ebp
