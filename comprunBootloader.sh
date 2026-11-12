@@ -20,6 +20,7 @@ compile(){
 	nasm -f elf32 -o "./build/syscalls.o" "./kernel/syscalls.s"
 	nasm -f elf32 -o "./build/idtasm.o" "./kernel/idt/idt.s"
 	nasm -f elf32 -o "./build/israsm.o" "./kernel/idt/isr/isrs.asm"
+	nasm -f elf32 -o "./build/stupidFixasm.o" "./drivers/biosIntFromC.asm"
 	# gcc -m32 -c ./kernel/kernel_init.c -o ./build/kernel_init.o $nodependencies -O2 -nostdlib
 	# gcc -m32 -c ./kernel/console.c -o ./build/console.o $nodependencies -O2 -nostdlib
 	# gcc -m32 -c ./drivers/vga.c -o ./build/vga.o $nodependencies -O2 -nostdlib
