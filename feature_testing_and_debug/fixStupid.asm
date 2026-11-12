@@ -98,7 +98,7 @@ mov cx, [cs:cx_holder]
 mov dx, [cs:dx_holder]
 mov di, [cs:di_holder]
 mov si, [cs:si_holder]
-sti
+; sti
 
 opcode_int: ;;0xcd is the opcode for an interrupt https://shell-storm.org/x86doc/INT_n_INTO_INT_3.html //imagine writing asm like this... maybe later never in this project again tho i hope
 db 0xcd 
@@ -171,6 +171,8 @@ popa ;;restore stuff that we stored before
 pop ebp
 ;;here is where the legendary sti was
 ;; it caused a bootloop i couldnt find for a LONG time
+
+sti ;;enable ints again
 ret
 
 align 4 ;; hax:

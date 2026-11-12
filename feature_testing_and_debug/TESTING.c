@@ -1,5 +1,6 @@
 #include "./vbe_new.h"
 #include "../drivers/machine.h"
+#include "../drivers/vga.h"
 
 void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also we should try to keep this file kinda clean... maybe
 
@@ -8,6 +9,12 @@ void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also w
     check_vbe_support();
 
     
+    sleep(1);
+
+    bios_print_vga_char_int_test('a');
+
+    
+
 
     // while (1){ //comment to continue, uncomment to hlt before loading the console
     //     __asm__ ("hlt");

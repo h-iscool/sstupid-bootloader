@@ -19,6 +19,26 @@ void time_init(){
 
 }
 
+void int_remaps(){
+    unsigned char a1 = inb(0x21);
+    unsigned char a2 = inb(0xa1);
+
+    outb(0x20,0x11);
+    outb(0xa0,0x11);
+
+    outb(0x21,0x20);
+    outb(0xa1,0x28);
+
+    outb(0x21,0x04);
+    outb(0xa1,0x02);
+
+    outb(0x21,0x01);
+    outb(0xa1,0x01);
+
+    outb(0x21,a1);
+    outb(0xa1,a2);
+}
+
 volatile uint32_t timer_ticks = 0;
 
 void timer_tick_call(){

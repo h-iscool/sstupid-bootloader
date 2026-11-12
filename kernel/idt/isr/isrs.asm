@@ -75,3 +75,15 @@ ISR_NOERRCODE 28; 28: Hypervisor Injection Exception
 ISR_ERRCODE 29; 29: VMM Communication Exception
 ISR_ERRCODE 30; 30: Security Exception
 ISR_NOERRCODE 31; 31: Reserved
+
+
+
+;; CUSTOM ISRS:
+
+extern timer_tick_call
+global _isr32
+_isr32:
+pusha
+call timer_tick_call
+popa
+iretd

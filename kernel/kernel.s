@@ -60,12 +60,21 @@ push 0x1
 extern idt_init ;; load idt init from c
 call idt_init
 
-call initScreen ;; load after idt so any errors can use the screen (LATER ADD SWITCH INSIDE OF THE SCREEN.C FILE)
+extern int_remaps
+call int_remaps
 
 ;; initialize timer thing so 1 PIT call is 1ms 
 ;; idk if this should be in c code or not but here it is going to be for now:
 extern time_init
 call time_init
+
+call initScreen ;; load after idt so any errors can use the screen (LATER ADD SWITCH INSIDE OF THE SCREEN.C FILE)
+
+
+
+sti ;;enable ints
+
+
 
 ;;testing call if enabled:
 cmp byte [call_load_testing], 0x0
