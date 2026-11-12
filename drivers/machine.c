@@ -25,7 +25,7 @@ void timer_tick_call(){
     timer_ticks++;
 
     //send end of interrupt to the programable interrupt controler
-    
+    outb(0x20,0x20);
 }
 
 
