@@ -9,8 +9,8 @@ void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also w
 
     
 
-    while (1){ //comment to continue, uncomment to hlt before loading the console
-        __asm__ ("hlt");
-    }
+    // while (1){ //comment to continue, uncomment to hlt before loading the console
+    //     __asm__ ("hlt");
+    // }
 
 }
