@@ -17,7 +17,7 @@ void set_bg_color (char color){
     bg_color=(uint8_t)color;
 }
 
-void vga_scroll_up(int lines){
+void vga_scroll_up(int lines,int setX){
     if (lines<=0){
         return;
     }
@@ -34,6 +34,7 @@ void vga_scroll_up(int lines){
     if (vga_cursor_y<0){
         vga_cursor_y=0;
     }
+    vga_cursor_x=setX;
 
 }
 
@@ -78,7 +79,7 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
         vga_cursor_y++;
     }
     if (vga_cursor_y>=25){
-            vga_scroll_up(1);
+            vga_scroll_up(1,10);
     }
     
 
