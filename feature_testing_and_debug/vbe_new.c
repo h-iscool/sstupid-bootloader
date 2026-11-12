@@ -37,6 +37,42 @@ typedef struct __attribute__((packed)) { //packed attribute = no padding from co
     uint8_t reserved[492]; //struct padding
 } vbe_info_block_t;
 
+typedef struct __attribute__((packed)) {
+    uint16_t attributes;
+    uint8_t window_a;
+    uint8_t window_b;
+    uint16_t granularity;
+    uint16_t window_size;
+    uint16_t segment_a;
+    uint16_t segment_b;
+    uint32_t win_func_ptr;
+    uint16_t pitch; // aka bytes per scan line
+    uint16_t width;
+    uint16_t height;
+    uint8_t w_char;
+    uint8_t y_char;
+    uint8_t planes;
+    uint8_t bpp;
+    uint8_t banks;
+    uint8_t memory_model;
+    uint8_t bank_size;
+    uint8_t image_pages;
+    uint8_t reserved0;
+    uint8_t red_mask;
+    uint8_t red_position;
+    uint8_t green_mask;
+    uint8_t green_position;
+    uint8_t blue_mask;
+    uint8_t blue_position;
+    uint8_t reserved_mask;
+    uint8_t reserved_position;
+    uint8_t direct_color_attributes;
+    uint32_t framebuffer; // 0x28 LFB addr (phys)
+    uint32_t off_screen_mem_off;
+    uint16_t off_screen_mem_size;
+    uint8_t reserved1[206];
+} vbe_mode_info_t;
+
 extern void real_mode_interrupt(uint8_t int_num, bios_regs16_t *regs);
 
 void bios_print_vga_char_int_test(char character){
@@ -51,6 +87,7 @@ void bios_print_vga_char_int_test(char character){
 
 
 extern vbe_info_block_t vbe_512_buffer; //exported from asm
+extern vbe_mode_info_t vbe_256_mode_buffer;
 
 void check_vbe_support() {
     bios_regs16_t regs = {0};
