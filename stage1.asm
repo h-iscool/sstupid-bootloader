@@ -3,6 +3,15 @@
 [org 0x7c00] ; the bootloader is the first 512 bytes of the drive but starts at 0x7c00 in memory for who knows why (i didnt look it up) so this just is being memory safe
 [bits 16]
 
+;;double check stack starts 0x7c00 (grows down) so it starts here but the first is down 1
+cli
+xor ax, ax
+mov ds, ax
+mov es, ax
+mov ss, ax
+mov sp, 0x7c00
+sti
+
 ; LOAD STAGE 2:
 
 

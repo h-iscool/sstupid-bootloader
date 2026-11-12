@@ -10,6 +10,11 @@ align 16
 vbe_512_buffer:
 times 512 db 0x0 ;;reserve 512 bytes (yes ik this is in the text area but this text area is right after stage 1 and stage 2 and there needs to be a 0% chance that this buffer is loaded over 1mb in ram (yes ikik the iso is too small for that to be possible but this is good futureproofing imo))
 
+global vbe_256_mode_buffer
+align 16
+vbe_256_mode_buffer:
+times 256 db 0x0
+
 real_mode_interrupt:
 
 push ebp
@@ -156,9 +161,9 @@ mov ax, [cx_holder]
 mov [esi+0x4], ax
 mov ax, [dx_holder]
 mov [esi+0x6], ax
-mov ax, [di_holder]
-mov [esi+0x8], ax
 mov ax, [si_holder]
+mov [esi+0x8], ax
+mov ax, [di_holder]
 mov [esi+0xa], ax
 mov ax, [ds_holder]
 mov [esi+0xc], ax
