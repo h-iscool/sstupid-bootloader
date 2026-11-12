@@ -3,6 +3,7 @@
 section .text.asmtoc ;; need to have this low in memory otherwise errors
 [bits 32] ;; comp be happy
 
+;;buffers for any functions needed in c
 global real_mode_interrupt
 global vbe_512_buffer
 

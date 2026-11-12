@@ -73,16 +73,25 @@ typedef struct __attribute__((packed)) {
     uint8_t reserved1[206];
 } vbe_mode_info_t;
 
+typedef struct {
+    uint16_t mode_num;
+    uint16_t width;
+    uint16_t height;
+    uint16_t pitch;
+    uint8_t  bpp;
+    uint32_t framebuffer;
+} vbe_mode_entry_for_list_t;
+
 extern void real_mode_interrupt(uint8_t int_num, bios_regs16_t *regs);
 
-void bios_print_vga_char_int_test(char character){
-    bios_regs16_t regs = {0};
 
-    regs.ax = (0x0e << 8) | character; //bc ah is the high 8 bits of ax and al is the low bits so we bitshift the first 8 up then or
-    regs.bx = 0x0007;
+static uint32_t screen_framebuffer = 0;
+static uint16_t screen_width = 0;
+static uint16_t screen_height = 0;
+static uint16_t screen_pitch = 0; //bytesperscanline is also called pitch and im getting tired of typing bytes per scan line
+static uint8_t screen_bpp; //bits per px or color depth
 
-    real_mode_interrupt(0x10, &regs);
-}
+static int vbeAllowed = 0;
 
 
 
@@ -90,6 +99,7 @@ extern vbe_info_block_t vbe_512_buffer; //exported from asm
 extern vbe_mode_info_t vbe_256_mode_buffer;
 
 void check_vbe_support() {
+    vbeAllowed = 0;
     bios_regs16_t regs = {0};
 
     // get the phys addr of the bujffer
@@ -119,8 +129,105 @@ void check_vbe_support() {
     if (regs.ax == 0x004F) { //VBE is enabled if the signiture returned is VESA
         if (vbe_512_buffer.signature[0] == 'V' && vbe_512_buffer.signature[1] == 'E' && vbe_512_buffer.signature[2] == 'S' && vbe_512_buffer.signature[3] == 'A') {
             
-            bios_print_vga_char_int_test('1');
+            vbeAllowed = 1;
 
         }
     }
+}
+
+
+
+//port of get mode inf
+static int vbe_get_mode_info(uint16_t mode){
+    if (!vbeAllowed){return 0;}
+    bios_regs16_t regs = {0};
+    uint32_t bufferaddr = (uint32_t)&vbe_256_mode_buffer;
+
+    regs.ax = 0x4f01;
+    regs.cx = mode;
+    regs.es = (uint16_t)(bufferaddr>>4);
+    regs.di = (uint16_t)(bufferaddr&0x0f);
+
+    real_mode_interrupt(0x10, &regs);
+
+    return(regs.ax == 0x004f);
+}
+
+
+static vbe_mode_entry_for_list_t availableModes[128]; // theres no solid max so we just are doing 128 ig 
+static uint16_t availableModesIdx = 0;
+
+static int vbe_res_exists(uint16_t width,uint16_t height){
+    if (!vbeAllowed){return 0;}
+    for (uint32_t i = 0; i < availableModesIdx; i++){
+        if (availableModes[i].width == width && availableModes[i].height == height){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void vbe_scan_resolutions(){
+    availableModesIdx = 0;
+    if (!vbeAllowed){return;}
+    uint32_t vmptr = vbe_512_buffer.video_mode_ptr;
+    uint16_t * modes = (uint16_t*)(((vmptr>>16)<<4)+(vmptr&0xffff)); //i hate ptr translation
+
+    for (int i=0; modes[i]!= 0xffff; i++){
+        if (availableModesIdx>=128){
+            break;
+        }
+
+        uint16_t mode = modes[i];
+        if (!vbe_get_mode_info(mode)){continue;}
+
+        if ((vbe_256_mode_buffer.attributes & 0x90) != 0x90){continue;} // keep if graphics mode and lfb support
+
+        if (vbe_256_mode_buffer.memory_model != 0x4 && vbe_256_mode_buffer.memory_model != 0x6){continue;} // only keep [ normal rbg mdoels]
+
+        if (vbe_256_mode_buffer.bpp != 32){continue;} //only keep wanted color depth (32)
+        
+        if (vbe_res_exists(vbe_256_mode_buffer.width,vbe_256_mode_buffer.height)){
+            continue;
+        }
+
+        availableModes[availableModesIdx]=(vbe_mode_entry_for_list_t){
+            .mode_num = mode,
+            .width = vbe_256_mode_buffer.width,
+            .height = vbe_256_mode_buffer.height,
+            .pitch = vbe_256_mode_buffer.pitch,
+            .bpp = vbe_256_mode_buffer.bpp,
+            .framebuffer = vbe_256_mode_buffer.framebuffer
+        };
+        availableModesIdx++;
+    
+    }
+
+
+}
+
+int vbe_try_set_resolution(uint16_t width, uint16_t height){
+    if (!vbeAllowed){return 0;}
+    for (uint32_t i = 0; i<availableModesIdx; i++){
+        if (availableModes[i].width == width && availableModes[i].height == height){
+
+            bios_regs16_t regs = {0};
+            regs.ax = 0x4f02; //set
+            regs.bx = availableModes[i].mode_num | 0x4000; // bit 0x4000 = lfb enabled
+
+            real_mode_interrupt(0x10,&regs);
+
+            if (regs.ax == 0x004f){
+                screen_framebuffer = availableModes[i].framebuffer;
+                screen_width = availableModes[i].width;
+                screen_height = availableModes[i].height;
+                screen_pitch = availableModes[i].pitch;
+                screen_bpp = availableModes[i].bpp;
+                return 1;
+            }
+            return 0;
+
+        }
+    }
+    return 0; //not in list
 }

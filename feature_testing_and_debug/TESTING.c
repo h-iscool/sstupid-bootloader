@@ -4,14 +4,9 @@
 
 void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also we should try to keep this file kinda clean... maybe
 
-    bios_print_vga_char_int_test('B');bios_print_vga_char_int_test('I');bios_print_vga_char_int_test('O');bios_print_vga_char_int_test('S');bios_print_vga_char_int_test(' ');bios_print_vga_char_int_test('r');bios_print_vga_char_int_test('e');bios_print_vga_char_int_test('a');bios_print_vga_char_int_test('l');bios_print_vga_char_int_test('-');bios_print_vga_char_int_test('m');bios_print_vga_char_int_test('o');bios_print_vga_char_int_test('d');bios_print_vga_char_int_test('e');bios_print_vga_char_int_test(' ');bios_print_vga_char_int_test('i');bios_print_vga_char_int_test('n');bios_print_vga_char_int_test('t');bios_print_vga_char_int_test('s');
-    
-    check_vbe_support();
-
-    
-    sleep(1);
-
-    bios_print_vga_char_int_test('a');
+    // check_vbe_support(); // need to make init fn
+    // vbe_scan_resolutions();
+    // vbe_try_set_resolution(1920,1080);
 
     
 
