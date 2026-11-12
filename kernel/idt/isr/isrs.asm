@@ -87,3 +87,11 @@ pusha
 call timer_tick_call
 popa
 iretd
+
+extern keyboard_int_handler
+global _isr33
+_isr33:
+pusha
+call keyboard_int_handler
+popa
+iretd
