@@ -5,11 +5,37 @@
 // }
 
 #include "vga.h"
-
+#include "./string.h"
 
 
 static int vga_cursor_x = 0;
 static int vga_cursor_y = 0;
+static volatile char * screen = (volatile char*)0xb8000;
+static uint8_t bg_color = 0x0f;
+
+void set_bg_color (char color){
+    bg_color=(uint8_t)color;
+}
+
+void vga_scroll_up(int lines){
+    if (lines<=0){
+        return;
+    }
+    if (lines>=25){
+        vga_clearScreen(bg_color);
+        vga_cursor_y=0;
+        return;
+    }
+    
+    memcpy((void *)screen,(void *)(screen+(lines*160)),(4000-(lines*160)));
+    memset_word((void *)(screen+(4000-(lines*160))),((uint16_t) 0x20 | (uint16_t) bg_color<<8),lines*80);
+
+    vga_cursor_y-=lines;
+    if (vga_cursor_y<0){
+        vga_cursor_y=0;
+    }
+
+}
 
 void vga_clearScreen(char color){
     volatile char* screen = (volatile char*)0xb8000;
@@ -20,6 +46,8 @@ void vga_clearScreen(char color){
     }
 }
 
+
+
 void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
 
     if (toPrint == '\n'){
@@ -29,7 +57,7 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
 
     else if (toPrint == '\b'){
 	vga_cursor_x--;
-	volatile char * screen = (volatile char*)0xb8000;
+	
 	int offset = (vga_cursor_y*80+vga_cursor_x)*2;
 
 	screen[offset] = 0x0;
@@ -37,7 +65,7 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
     }
 
     else{
-        volatile char * screen = (volatile char*)0xb8000;
+        
         int offset = (vga_cursor_y*80+vga_cursor_x)*2;
 
         screen[offset] = toPrint;
@@ -48,6 +76,9 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
     if (vga_cursor_x>=80){
         vga_cursor_x = 0;
         vga_cursor_y++;
+    }
+    if (vga_cursor_y>=25){
+            vga_scroll_up(1);
     }
     
 

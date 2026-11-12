@@ -27,6 +27,6 @@ void vga_clearScreen(char color);
 void vga_printChar(char toPrint, char color);
 void vga_printString(const char* string, char color);
 char vga_pack_colors(char characterColor, char backgroundColor);
-
+void vga_scroll_up(int lines);
 
 #endif

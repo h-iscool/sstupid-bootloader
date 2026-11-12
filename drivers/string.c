@@ -1,9 +1,21 @@
 #include <stddef.h>
 #include "string.h"
+#include <stdint.h>
 
 void *memset(void * ptr, size_t val, size_t size){
     
     unsigned char * p = (unsigned char *)ptr; //cant index a void pointer so we index an unsigned char ptr, why unsigned? because for some reason there can be a negitive char
+
+    for (size_t i = 0; i<size; i++){
+        p[i] = val;
+    }
+
+    return ptr;
+}
+
+void *memset_word(void * ptr, uint16_t val, size_t size){
+    
+    uint16_t * p = (uint16_t *)ptr; //cant index a void pointer so we index an unsigned char ptr, why unsigned? because for some reason there can be a negitive char
 
     for (size_t i = 0; i<size; i++){
         p[i] = val;

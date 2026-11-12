@@ -2,6 +2,7 @@
 #include "vbe.h"
 #include "screen.h"
 
+
 static int videoDriver = 0;
 
 static char vga_colorScheme = 0x0f;

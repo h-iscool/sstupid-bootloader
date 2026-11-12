@@ -2,7 +2,7 @@
 #define STRING_H
 
 #include <stddef.h>
-
+#include <stdint.h>
 #include <limits.h>
 
 #if UINT_MAX != 0xFFFFFFFFU
@@ -10,6 +10,7 @@
 #endif
 
 void *memset(void * ptr, size_t val, size_t size);
+void *memset_word(void * ptr, uint16_t val, size_t size);
 void *memcpy(void * dest, const void * src, size_t size);
 size_t strlen(const char * string);
 int strcmp (const char * string_A, const char * string_B);
