@@ -85,6 +85,7 @@ text_loading: db "Loading sectors...", 0xa, 0xd, 0
 
 
 driveloaderr: ;; ERR: 1
+cli
 mov si, text_err1
 call print_until_null
 hlt
