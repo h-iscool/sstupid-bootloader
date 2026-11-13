@@ -7,5 +7,6 @@ int init_vbeConsole(int attempted_vbe_width,int attempted_vbe_height,uint32_t bg
 void vbe_clearScreen();
 void vbe_print_string(const char * string);
 void vbe_print_char(char character);
+void vbe_canbackspacelines(int oneistrue0isfalse);
 
 #endif

@@ -68,8 +68,8 @@ compile(){
 
 	cat ./build/stage1.bin ./build/linked.bin > ./build/image.bin
 
-	# 64 sectors padding:
-	truncate -s 32768 ./build/image.bin
+	# padding:
+	truncate -s 64k ./build/image.bin
 
 }
 

@@ -73,11 +73,21 @@ void vbe_draw_char(char c, uint32_t x, uint32_t y, uint32_t fg, uint32_t bg) {
 
 void vbe_print_string(const char *);
 
+static uint8_t canbackspacelines = 0;
+
+void vbe_canbackspacelines(int oneistrue0isfalse){
+    canbackspacelines=(uint8_t)oneistrue0isfalse;
+}
+
 void vbe_print_char(char character){
 
     if (character=='\n'){
         cursor_x=0;
         cursor_y++;
+        if (cursor_y>=maxLines){
+            cursor_y--;
+            scrollUp_lines(1);
+        }   
         return;
     }
     if (character=='\r'){
@@ -86,6 +96,23 @@ void vbe_print_char(char character){
     }
     if (character=='\t'){
         vbe_print_string("     ");
+        return;
+    }
+    if (character=='\b'){
+        if (cursor_x>0){
+            cursor_x--;
+            vbe_print_char(' ');
+            cursor_x--;
+        }else if ((cursor_y>0) && (canbackspacelines == (uint8_t)1))
+        {
+            cursor_y--;
+            cursor_x=maxCharsPerLine-1;
+            vbe_print_char(' ');
+            cursor_y--;
+            cursor_x=maxCharsPerLine-1;
+        }
+        
+        
         return;
     }
 
