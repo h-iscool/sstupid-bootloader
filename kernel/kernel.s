@@ -54,7 +54,7 @@ jmp .cotr_loop
 ; push 0x2
 ; jmp vga_skip
 ; vga:
-push 0x1
+push 0x2 ;;vga = 0x1 attempting to load vbe with vga fallback = 0x2
 ; vga_skip:
 
 extern idt_init ;; load idt init from c

@@ -78,7 +78,7 @@ run() {
 	if [ -w /dev/kvm ]; then
 		kvmargs="-enable-kvm -cpu host"
 	else
-		kvmargs="-accel tcg,thread=multi -cpu qemu64"
+		kvmargs="-accel tcg,thread=multi -cpu qemu64 -display sdl"
 	fi
 	qemu-system-x86_64 \
 	  $kvmargs \

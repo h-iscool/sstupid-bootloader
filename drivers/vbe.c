@@ -270,8 +270,8 @@ void vbe_fill_rect(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2,uint32_t c
     uint32_t maxY = y2;
     if (y2<minY){minY=y2;maxY=y1;}
 
-    for (uint32_t y = minY; y<maxY; y++){
-        for (uint32_t x = minX; x<maxX; x++){
+    for (uint32_t y = minY; y<=maxY; y++){
+        for (uint32_t x = minX; x<=maxX; x++){
             fbptr[x+(y*pxPerScanLine)] = color;
         }
     }
@@ -286,4 +286,12 @@ int vbe_get_width(){
 
 int vbe_get_height(){
     return screen_height;
+}
+
+int vbe_get_pitch(){
+    return screen_pitch;
+}
+
+uint32_t * vbe_get_fb_ptr(){
+    return fbptr;
 }

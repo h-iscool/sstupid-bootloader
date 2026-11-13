@@ -1,5 +1,5 @@
 #include "vga.h"
-#include "vbe.h"
+#include "vbeconsole.h"
 #include "screen.h"
 
 
@@ -13,6 +13,7 @@ void printString(const char* string) {
 			vga_printString(string, vga_colorScheme);
 			break;
 		case DRIVER_VBE:
+			vbe_print_string(string);
 			break;
 	}
 
@@ -24,6 +25,7 @@ void printChar(char toPrint) {
 			vga_printChar(toPrint, vga_colorScheme);
 			break;
 		case DRIVER_VBE:
+			vbe_print_char(toPrint);
 			break;
 	}
 }
@@ -35,6 +37,7 @@ void clearScreen() {
 			vga_clearScreen(vga_colorScheme);
 			break;
 		case DRIVER_VBE:
+			vbe_clearScreen();
 			break;
 	}
 }
@@ -46,7 +49,9 @@ void initScreen(int screen){
 			vga_clearScreen(vga_colorScheme);
 			break;
 		case DRIVER_VBE:
-			//vbe_debug();
+			if (init_vbeConsole(1920,1080,0xff555577,0xffffffff)==0){
+				initScreen(1);
+			}
 			break;
 	}
 
