@@ -100,7 +100,7 @@ static int vbeAllowed = 0;
 extern vbe_info_block_t vbe_512_buffer; //exported from asm
 extern vbe_mode_info_t vbe_256_mode_buffer;
 
-void check_vbe_support() {
+int check_vbe_support() {
     vbeAllowed = 0;
     bios_regs16_t regs = {0};
 
@@ -132,9 +132,11 @@ void check_vbe_support() {
         if (vbe_512_buffer.signature[0] == 'V' && vbe_512_buffer.signature[1] == 'E' && vbe_512_buffer.signature[2] == 'S' && vbe_512_buffer.signature[3] == 'A') {
             
             vbeAllowed = 1;
+            return 1;
 
         }
     }
+    return 0;
 }
 
 
