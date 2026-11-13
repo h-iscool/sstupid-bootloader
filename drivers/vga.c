@@ -79,7 +79,7 @@ void vga_printChar(char toPrint, char color){ //https://wiki.osdev.org/Text_UI
         vga_cursor_y++;
     }
     if (vga_cursor_y>=25){
-            vga_scroll_up(1,10);
+            vga_scroll_up(1,0);
     }
     
 
