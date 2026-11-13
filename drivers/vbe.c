@@ -90,7 +90,8 @@ static uint16_t screen_width = 0;
 static uint16_t screen_height = 0;
 static uint16_t screen_pitch = 0; //bytesperscanline is also called pitch and im getting tired of typing bytes per scan line
 static uint8_t screen_bpp; //bits per px or color depth
-uint32_t *fbptr = 0;
+static uint32_t *fbptr = 0;
+static uint32_t pxPerScanLine = 0;
 
 
 static int vbeAllowed = 0;
@@ -232,6 +233,7 @@ int vbe_try_set_resolution(uint16_t width, uint16_t height){
                 screen_pitch = availableModes[i].pitch;
                 screen_bpp = availableModes[i].bpp;
                 fbptr = (uint32_t *)(uintptr_t)screen_framebuffer;
+                pxPerScanLine = (screen_pitch/4);
                 return 1;
             }
             return 0;
@@ -247,8 +249,41 @@ void vbe_fill_screen(uint32_t color) {
     }
 
     for (int y = 0; y<screen_height;y++){
-        for (int x = 0; x<(screen_pitch/4);x++){
-            fbptr[(x+(y*(screen_pitch/4)))] = color;
+        for (int x = 0; x<pxPerScanLine;x++){
+            fbptr[(x+(y*pxPerScanLine))] = color;
         }
     }
+}
+
+void vbe_fill_rect(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2,uint32_t color){
+    //calc bounds (mroe then 2 fps plz)
+    if (!screen_framebuffer || screen_bpp != 32) {
+        return;
+    }
+
+
+    if (x1==x2||y2==y1){return;}
+    uint32_t minX = x1;
+    uint32_t maxX = x2;
+    if (x2<minX){minX=x2;maxX=x1;}
+    uint32_t minY = y1;
+    uint32_t maxY = y2;
+    if (y2<minY){minY=y2;maxY=y1;}
+
+    for (uint32_t y = minY; y<maxY; y++){
+        for (uint32_t x = minX; x<maxX; x++){
+            fbptr[x+(y*pxPerScanLine)] = color;
+        }
+    }
+
+
+}
+
+int vbe_get_width(){
+    return screen_width;
+}
+
+
+int vbe_get_height(){
+    return screen_height;
 }
