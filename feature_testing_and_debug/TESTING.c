@@ -7,9 +7,9 @@ void LOAD_TESTING(){ //ikik its c not asm but C is so much more readable. also w
 
     printString("Loading VBE");
 
-    sleep(1000);
+    // sleep(1000);
 
-    init_vbeConsole(1920,1080,0xff555577);
+    init_vbeConsole(1920,1080,0xff555577,0xffffffff);
     
 
 
